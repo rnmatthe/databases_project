@@ -1,4 +1,5 @@
---1---------------------------
+--1------people who work for a specific company
+-------tested sufficiently
 SELECT per_name
 FROM person, works, position, company
 WHERE person.per_id = works.per_id AND position.comp_id = company.comp_id
@@ -36,13 +37,14 @@ FROM costs
 GROUP BY comp_id
 ORDER BY total_cost DESC;
                      
---4------------------------------
+--4------positions a person is working in now or in the past
+-----tested sufficiently
 SELECT person.per_id, person.per_name, works.pos_code
 FROM person, works
 WHERE person.per_id = works.per_id
 AND person.per_id = 1;
 
---5------------------------------
+--5-----skill code and title that a person has-------
 SELECT knowledge_skill.ks_code, knowledge_skill.title
 FROM has_skill, knowledge_skill
 WHERE has_skill.ks_code = knowledge_skill.ks_code
