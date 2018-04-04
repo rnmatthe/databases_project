@@ -32,7 +32,7 @@ create table person(
 	city varchar(20),
 	state varchar(20),
 	zip_code number(5,0),
-	email varchar(20),
+	email varchar(25),
 	gender varchar(8) check (gender = 'female' or gender = 'male'),
 
 	primary key (per_id)
@@ -51,7 +51,7 @@ create table position(
 	pos_code number,
 	emp_mode varchar(10) check (emp_mode = 'full-time' or emp_mode = 'part-time'),
 	pay_rate number,
-	pay_type varchar(10),
+	pay_type varchar(10) check (pay_type = 'salary' or pay_type = 'wage'),
 	comp_id number,
 
 	primary key (pos_code)
@@ -217,6 +217,27 @@ insert into person(per_id, per_name, street_name, street_num, city, state, zip_c
 insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (3, 'Ferdinande Koche', 'Maple Wood', 201, 'Asheville', 'North Carolina', 28805, 'fkoche2@tinypic.com', 'female');
 insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (4, 'Tobiah Faveryear', 'Hayes', 107, 'Rockville', 'Maryland', 20851, 'tfaveryear3@cdc.gov', 'male');
 insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (5, 'Elke Lenham', 'Arkansas', 202, 'Miami', 'Florida', 33129, 'elenham4@marr.com', 'female');
+
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (6, 'Harli Ives', 'Prairie Rose', 5, 'Hampton', 'Virginia', 23663, 'hives5@ocn.ne.jp', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (7, 'Adria De Ath', 'Golf', 08907, 'Washington', 'District of Columbia', 20430, 'ade6@kickstarter.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (8, 'Karola Hayball', 'Daystar', 9236, 'Springfield', 'Virginia', 22156, 'khayball7@loc.gov', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (9, 'Shurwood Sappy', 'Northridge', 671, 'New York City', 'New York', 10060, 'ssappy8@desdev.cn', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (10, 'Alison Stanbridge', 'Bluejay', 97848, 'El Paso', 'Texas', 88535, 'astanbridge9@google.ru', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (11, 'Archie Chatelain', 'Lillian', 87249, 'Norwalk', 'Connecticut', 06859, 'achatelaina@netlog.com', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (12, 'Franky Greenroyd', 'Stone Corner', 26, 'Raleigh', 'North Carolina', 27621, 'fgreenroydb@cornell.edu', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (13, 'Dorian Ludovici', 'Westerfield', 62992, 'Austin', 'Texas', 78726, 'dludovicic@omniture.com', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (14, 'Kristyn Aires', 'Onsgard', 5, 'Washington', 'District of Columbia', 20078, 'kairesd@alexa.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (15, 'Tulley Tippett', 'Bartillon', 5000, 'San Diego', 'California', 92170, 'ttippette@theatlantic.com', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (16, 'Tammie Dudin', 'Texas', 77371, 'Topeka', 'Kansas', 66622, 'tdudinf@diigo.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (17, 'Monika Fossick', 'Victoria', 5, 'Portsmouth', 'New Hampshire', 03804, 'mfossickg@springer.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (18, 'Adler Clementi', 'Oak', 57, 'El Paso', 'Texas', 88541, 'aclementih@digg.com', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (19, 'Alberto MacKnight', 'Nelson', 7, 'Fort Myers', 'Florida', 33913, 'amacknighti@biglobe.ne.jp', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (20, 'Damara Planks', 'Warbler', 93072, 'Newport News', 'Virginia', 23605, 'dplanksj@acquiret.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (21, 'Joli Chaff', 'Kenwood', 960, 'Seattle', 'Washington', 98195, 'jchaffk@hostgator.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (22, 'Sayres Le Provost', 'Roxbury', 54911, 'Newark', 'Delaware', 19729, 'slel@jimdo.com', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (23, 'Berna Brimmicombe', 'Pepper Wood', 74, 'Amarillo', 'Texas', 79116, 'bbrimmi@qcast.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (24, 'Catharina Donaway', 'Anderson', 02, 'Aurora', 'Colorado', 80015, 'cdonaway@mozilla.org', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (25, 'Tamar Jerrolt', 'Montana', 8, 'San Diego', 'California', 92165, 'tjerrolto@sfgate.com', 'female');
 
 --NWCET
 insert into nwcet(cc_code, title) values ('DDA', 'Database Development and Administration');
