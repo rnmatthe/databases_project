@@ -191,7 +191,7 @@ WITH needed_skills AS ((SELECT ks_code
                                                               WHERE T.c_code = P.c1_code 
                                                               OR T.c_code = P.c2_code))
                                                       THEN c3_code
-                                                ELSE -1 ---insert -1 instead of null
+                                                ELSE -1 
                                            END AS c3_code
                   FROM covers_all P),
      legit_three AS (SELECT *
@@ -250,25 +250,31 @@ ORDER BY price ASC;
 --13--job categories that they're qualified for
 
 --14--position with highest payrate according to their skills given pid 
-WITH qualified_for AS (SELECT pos_code
+------tested, works
+WITH per_skills AS (SELECT ks_code
+                    FROM has_skill
+                    WHERE per_id = 1),
+     qualified_for AS (SELECT DISTINCT pos_code
                        FROM requires R
                        WHERE NOT EXISTS ((SELECT ks_code
                                           FROM requires P
-                                          WHERE P.ks_code = R.ks_code)
+                                          WHERE P.pos_code = R.pos_code)
                                           MINUS
-                                         (SELECT ks_code
-                                          FROM has_skill
-                                          WHERE per_id = 1))),
-     max_salary AS (SELECT MAX(pay_rate) AS sal
-                    FROM position NATURAL JOIN qualified_for)
-SELECT position.pos_code, sal
-FROM qualified_for, max_salary, position
+                                          (SELECT ks_code
+                                          FROM per_skills))
+                      ),
+     max_salary AS (SELECT MAX(pay_rate) AS max_sal
+                    FROM qualified_for NATURAL JOIN position
+                    WHERE pay_type = 'salary')
+SELECT position.pos_code, position.pay_rate
+FROM qualified_for, position, max_salary
 WHERE qualified_for.pos_code = position.pos_code
-AND position.pay_rate = max_salary.sal;
+AND position.pay_rate = max_salary.max_sal;
 
 --15
 
 --16 ------"missing one" skill list
+----------tested, works
 WITH needed_skills AS (SELECT ks_code
                        FROM requires
                        WHERE pos_code = 23),
@@ -282,6 +288,7 @@ FROM num_has, num_skills_req
 WHERE num_has.num = num_skills_req.num - 1;
 
 --17------how many people missed each skill-------
+---------tested, works
 WITH needed_skills AS (SELECT ks_code
                        FROM requires
                        WHERE pos_code = 23),
@@ -304,91 +311,71 @@ WHERE NOT EXISTS (SELECT *
 GROUP BY ks_code;
 
 --18--ppl who miss the least number and report the least number
+-----------tested, works
 WITH needed_skills AS (SELECT ks_code
                        FROM requires
                        WHERE pos_code = 23),
-     combined AS (SELECT per_id, ks_code
-                  FROM needed_skills, person),
-     missing AS (SELECT per_id, COUNT(ks_code) AS num
-                 FROM combined P
-                 WHERE EXISTS ((SELECT *
-                                FROM needed_skills T
-                                WHERE T.ks_code = P.ks_code)
-                                MINUS
-                               (SELECT ks_code
-                                FROM has_skill H
-                                WHERE H.per_id = P.per_id
-                                AND H.ks_code = P.ks_code))
-                 GROUP BY per_id),
-     min_missing AS (SELECT MIN(num) AS min_num
-                     FROM missing)
-SELECT per_id, num
-FROM missing, min_missing
-WHERE missing.num = min_missing.min_num;
+      missing_skills AS ((SELECT per_id, ks_code
+                          FROM person, needed_skills)
+                          MINUS
+                         (SELECT per_id, ks_code
+                          FROM has_skill NATURAL JOIN needed_skills)),
+      count_missing AS (SELECT per_id, COUNT(ks_code) AS num_missing
+                        FROM missing_skills
+                        GROUP BY per_id),
+      min_missing AS (SELECT MIN(num_missing) AS min_num
+                      FROM count_missing)
+SELECT per_id, num_missing
+FROM count_missing, min_missing
+WHERE num_missing = min_num;
 
---19--missing 'k' number of skills, list per_id and num in ascending order of missing
+--19--missing <= k number of skills, list per_id and num in ascending order of missing
+------tested, works
 WITH needed_skills AS (SELECT ks_code
                        FROM requires
                        WHERE pos_code = 23),
-     combined AS (SELECT per_id, ks_code
-                  FROM needed_skills, person),
-     missing AS (SELECT per_id, COUNT(ks_code) AS num
-                 FROM combined P
-                 WHERE EXISTS ((SELECT *
-                                FROM needed_skills T
-                                WHERE T.ks_code = P.ks_code)
-                                MINUS
-                               (SELECT ks_code
-                                FROM has_skill H
-                                WHERE H.per_id = P.per_id
-                                AND H.ks_code = P.ks_code))
-                 GROUP BY per_id)
-SELECT per_id, num
-FROM missing
-WHERE num < 5
-ORDER BY num;
+      missing_skills AS ((SELECT per_id, ks_code
+                          FROM person, needed_skills)
+                          MINUS
+                         (SELECT per_id, ks_code
+                          FROM has_skill NATURAL JOIN needed_skills)),
+      count_missing AS (SELECT per_id, COUNT(ks_code) AS num_missing
+                        FROM missing_skills
+                        GROUP BY per_id)
+SELECT per_id, num_missing
+FROM count_missing
+WHERE num_missing < 3
+ORDER BY num_missing ASC;
+
 
 --20--- every skill needed by missking-k ppl and num ppl missing it, ascending order
+------- tested, works
 WITH needed_skills AS (SELECT ks_code
                        FROM requires
                        WHERE pos_code = 23),
-     combined AS (SELECT per_id, ks_code
-                  FROM needed_skills, person),
-     missing AS (SELECT per_id, COUNT(ks_code) AS num
-                 FROM combined P
-                 WHERE EXISTS ((SELECT *
-                                FROM needed_skills T
-                                WHERE T.ks_code = P.ks_code)
-                                MINUS
-                               (SELECT ks_code
-                                FROM has_skill H
-                                WHERE H.per_id = P.per_id
-                                AND H.ks_code = P.ks_code))
-                 GROUP BY per_id),
-     missing_k AS (SELECT per_id
-                   FROM missing
-                   WHERE num < 5)
-SELECT ks_code, COUNT(per_id) AS num_ppl
-FROM combined P
-WHERE EXISTS ((SELECT *
-               FROM needed_skills N
-               WHERE N.ks_code = P.ks_code)
-               MINUS
-              (SELECT ks_code
-               FROM has_skill T
-               WHERE T.ks_code = P.ks_code
-               AND T.per_id = P.per_id
-               AND EXISTS (SELECT *
-                           FROM missing_k M
-                           WHERE M.per_id = T.per_id))
-              )
-GROUP BY ks_code
-ORDER BY num_ppl;
+      missing_skills AS ((SELECT per_id, ks_code
+                          FROM person, needed_skills)
+                          MINUS
+                         (SELECT per_id, ks_code
+                          FROM has_skill NATURAL JOIN needed_skills)),
+      count_missing AS (SELECT per_id, COUNT(ks_code) AS num_missing
+                        FROM missing_skills
+                        GROUP BY per_id),
+      missing_k AS (SELECT per_id, num_missing
+                    FROM count_missing
+                    WHERE num_missing < 3),
+      missing_k_skills AS (SELECT ks_code, COUNT(per_id) AS num_people
+                           FROM missing_skills NATURAL JOIN missing_k
+                           GROUP BY ks_code)
+SELECT ks_code, num_people
+FROM missing_k_skills
+ORDER BY num_people ASC;
+
 
 --21
 
 --22--unemployed ppl once held position
-------tested with one person
+------tested, works
 SELECT per_id, per_name
 FROM person P
 WHERE NOT EXISTS (SELECT pos_code
@@ -397,12 +384,13 @@ WHERE NOT EXISTS (SELECT pos_code
                   AND T.end_date > SYSDATE)
 AND EXISTS (SELECT *
             FROM works W
-            WHERE W.pos_code = 23
+            WHERE W.pos_code = 26
             AND W.per_id = P.per_id);
             
 --23
 
---24--requires specialites
+--24-- job distributions among business sectors
+--------------------------max employees and max salaries/wages (two queries)
 
 
 --25

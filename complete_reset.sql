@@ -262,6 +262,7 @@ insert into works(per_id, pos_code, start_date, end_date) values (2, 24, to_date
 insert into works(per_id, pos_code, start_date, end_date) values (3, 25, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
 insert into works(per_id, pos_code, start_date, end_date) values (4, 26, to_date ('03 MAY 2001'), to_date ('07 MAY 2011'));
 insert into works(per_id, pos_code, start_date, end_date) values (5, 27, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
+insert into works(per_id, pos_code, start_date, end_date) values (8, 26, to_date ('03 MAY 2001'), to_date ('07 MAY 2021'));
 
 --NWCET
 insert into nwcet(cc_code, title) values ('DDA', 'Database Development and Administration');
@@ -288,6 +289,11 @@ insert into falls_under(ks_code, cc_code) values ( 451, 'WDA');
 insert into has_skill(per_id, ks_code) values (1, 346);
 insert into has_skill(per_id, ks_code) values (1, 301);
 insert into has_skill(per_id, ks_code) values (2, 301);
+insert into has_skill(per_id, ks_code) values (5, 346);
+insert into has_skill(per_id, ks_code) values (5, 478);
+insert into has_skill(per_id, ks_code) values (6, 478);
+insert into has_skill(per_id, ks_code) values (6, 346);
+insert into has_skill(per_id, ks_code) values (7, 301);
 
 --requires
 insert into requires(pos_code, ks_code, prefer) values (23, 346, null);
@@ -297,6 +303,10 @@ insert into requires(pos_code, ks_code, prefer) values (26, 346, null);
 insert into requires(pos_code, ks_code, prefer) values (26, 478, null);
 insert into requires(pos_code, ks_code, prefer) values (26, 301, null);
 insert into requires(pos_code, ks_code, prefer) values (26, 451, null);
+insert into requires(pos_code, ks_code, prefer) values (24, 346, null);
+insert into requires(pos_code, ks_code, prefer) values (24, 301, null);
+insert into requires(pos_code, ks_code, prefer) values (25, 346, null);
+insert into requires(pos_code, ks_code, prefer) values (25, 301, null);
 
 
 --course
