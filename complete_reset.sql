@@ -229,14 +229,7 @@ insert into person (per_id, per_name, street_name, street_num, city, state, zip_
 insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (24, 'Catharina Donaway', 'Anderson', 02, 'Aurora', 'Colorado', 80015, 'cdonaway@mozilla.org', 'female');
 insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (25, 'Tamar Jerrolt', 'Montana', 8, 'San Diego', 'California', 92165, 'tjerrolto@sfgate.com', 'female');
 
---NWCET
-insert into nwcet(cc_code, title) values ('DDA', 'Database Development and Administration');
-insert into nwcet(cc_code, title) values ('DM', 'Digital Media');
-insert into nwcet(cc_code, title) values ('ESAI', 'Enterprise Systems Analysis and Integration');
-insert into nwcet(cc_code, title) values ('NDA', 'Network Design and Administration');
-insert into nwcet(cc_code, title) values ('PSE', 'Programming/Software Engineering');
-insert into nwcet(cc_code, title) values ('TS', 'Technical Support');
-insert into nwcet(cc_code, title) values ('WDA', 'Web Development and Administration');
+
 
 --naics
 insert into naics(ind_code, ind_title) values (511210, 'Software Publishers');
@@ -270,8 +263,27 @@ insert into works(per_id, pos_code, start_date, end_date) values (3, 25, to_date
 insert into works(per_id, pos_code, start_date, end_date) values (4, 26, to_date ('03 MAY 2001'), to_date ('07 MAY 2011'));
 insert into works(per_id, pos_code, start_date, end_date) values (5, 27, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
 
+--NWCET
+insert into nwcet(cc_code, title) values ('DDA', 'Database Development and Administration');
+insert into nwcet(cc_code, title) values ('DM', 'Digital Media');
+insert into nwcet(cc_code, title) values ('ESAI', 'Enterprise Systems Analysis and Integration');
+insert into nwcet(cc_code, title) values ('NDA', 'Network Design and Administration');
+insert into nwcet(cc_code, title) values ('PSE', 'Programming/Software Engineering');
+insert into nwcet(cc_code, title) values ('TS', 'Technical Support');
+insert into nwcet(cc_code, title) values ('WDA', 'Web Development and Administration');
+
 --knowledge skill
 insert into knowledge_skill(ks_code, title, description, skill_level) values (346, 'MySQL', 'query language', 'medium');
+insert into knowledge_skill(ks_code, title, description, skill_level) values (478, 'Java', 'object oriented programming language', 'beginner');
+insert into knowledge_skill(ks_code, title, description, skill_level) values (301, 'FireAlpaca', 'digital art program', 'beginner');
+insert into knowledge_skill(ks_code, title, description, skill_level) values (451, 'JavaScript', 'scripting language', 'medium');
+
+--falls under
+insert into falls_under(ks_code, cc_code) values ( 346, 'DDA');
+insert into falls_under(ks_code, cc_code) values ( 478, 'PSE');
+insert into falls_under(ks_code, cc_code) values ( 301, 'DM');
+insert into falls_under(ks_code, cc_code) values ( 451, 'WDA');
+
 
 --course
 insert into course(c_code, title, description, status, retail_price) values (123, 'Alpacas', 'Alpaca farming', 'active', 100);
