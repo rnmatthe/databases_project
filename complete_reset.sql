@@ -115,7 +115,7 @@ create table section(
 create table knowledge_skill(
     ks_code number,
     title varchar(10),
-    description varchar(20),
+    description varchar(40),
     skill_level varchar(8),
     
     primary key (ks_code)
