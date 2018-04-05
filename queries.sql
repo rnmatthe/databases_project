@@ -148,96 +148,7 @@ FROM (SELECT c_code, title, sec_no, complete_date, retail_price
 WHERE rownum = 1;                                                 
 
 --12--course sets that would make someone qualified (3 or less)
-WITH needed_skills AS (SELECT ks_code
-                        FROM requires
-                        WHERE pos_code = 23),
-     relevent_courses AS (SELECT c_code
-                          FROM teaches NATURAL JOIN needed_skills),
-     c1 AS (SELECT *
-            FROM relevent_courses),
-     c2 AS (SELECT *
-            FROM relevent_courses),
-     c3 AS (SELECT *
-            FROM relevent_courses),
-     all_poss AS (SELECT c1.c_code AS c1_code, c2.c_code AS c2_code, c3.c_code AS c3_code
-                  FROM c1, c2, c3
-                  WHERE c1.c_code != c2.c_code
-                  AND c1.c_code != c3.c_code
-                  AND c2.c_code != c3.c_code),
-     covers_all AS (SELECT *
-                    FROM all_poss P
-                    WHERE NOT EXISTS ((SELECT ks_code
-                                       FROM needed_skills)
-                                       MINUS
-                                      (SELECT ks_code
-                                       FROM teaches T
-                                       WHERE T.c_code = P.c1_code
-                                       OR T.c_code = P.c2_code
-                                       OR T.c_code = P.c3_code)
-                                     )
-                   ),
-     find_two AS (SELECT c1_code, c2_code, CASE
-                                                WHEN EXISTS ((SELECT ks_code
-                                                              FROM needed_skills)
-                                                              MINUS
-                                                             (SELECT ks_code
-                                                              FROM teaches T
-                                                              WHERE T.c_code = P.c1_code 
-                                                              OR T.c_code = P.c2_code))
-                                                      THEN c3_code
-                                                ELSE null
-                                           END AS c3_code
-                  FROM covers_all P),
-     legit_three AS (SELECT *
-                     FROM find_two P
-                     WHERE NOT EXISTS ( SELECT c1_code, c2_code
-                                        FROM find_two T
-                                        WHERE T.c1_code = P.c1_code
-                                        AND T.c2_code = P.c2_code
-                                        AND T.c3_code = null )
-                     AND NOT EXISTS ( SELECT c1_code, c2_code
-                                      FROM find_two T
-                                      WHERE T.c1_code = P.c2_code
-                                      AND T.c2_code = P.c1_code
-                                      AND T.c3_code = null )
-                    ),
-     with_costs AS (SELECT c1_code, c2_code, c3_code, course.retail_price
-                    FROM legit_three, course
-                    WHERE legit_three.c1_code = course.c_code
-                    OR legit_three.c2_code = course.c_code
-                    OR legit_three.c3_code = course.c_code),
-     sum_costs AS (SELECT c1_code, c2_code, c3_code, SUM (retail_price) AS price
-                   FROM with_costs 
-                   GROUP BY c1_code, c2_code, c3_code),
-     concat AS (SELECT CASE
-                            WHEN P.c3_code = null 
-                            THEN CASE
-                                     WHEN P.c1_code < P.c2_code
-                                         THEN TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c2_code)
-                                     ELSE TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c1_code)
-                                 END  
-                            ELSE CASE 
-                                     WHEN P.c1_code < P.c2_code AND P.c2_code < P.c3_code--123
-                                          THEN TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c3_code)
-                                     WHEN P.c1_code < P.c3_code AND P.c3_code < P.c2_code--132
-                                          THEN TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c2_code)
-                                     WHEN P.c2_code < P.c1_code AND P.c1_code < P.c3_code--213
-                                          THEN TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c3_code)
-                                     WHEN P.c2_code < P.c3_code AND P.c3_code < P.c1_code--231
-                                          THEN TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c1_code)
-                                     WHEN P.c3_code < P.c1_code AND P.c1_code < P.c2_code--312
-                                          THEN TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c2_code)
-                                     ELSE TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c1_code)
-                                 END   
-                       END AS courses, price
-                FROM sum_costs P)
-SELECT DISTINCT(courses), price
-FROM concat
-ORDER BY price DESC;
-
-
---MESS WITH THIS COPY (below)
-
+-----tested, works
 WITH needed_skills AS ((SELECT ks_code
                        FROM requires
                        WHERE pos_code = 26)
@@ -280,7 +191,7 @@ WITH needed_skills AS ((SELECT ks_code
                                                               WHERE T.c_code = P.c1_code 
                                                               OR T.c_code = P.c2_code))
                                                       THEN c3_code
-                                                ELSE null
+                                                ELSE -1 ---insert -1 instead of null
                                            END AS c3_code
                   FROM covers_all P),
      legit_three AS (SELECT *
@@ -309,7 +220,7 @@ WITH needed_skills AS ((SELECT ks_code
                     ),
      combine_legit AS (SELECT c1_code, c2_code, c3_code
                        FROM find_two P
-                       WHERE c3_code IS NULL
+                       WHERE c3_code = -1
                        OR EXISTS (SELECT *
                                   FROM legit_three T
                                   WHERE T.c1_code = P.c1_code
@@ -323,11 +234,16 @@ WITH needed_skills AS ((SELECT ks_code
                    GROUP BY c1_code, c2_code, c3_code),--good to this point
      remove_duplicates AS (SELECT c1_code, c2_code, c3_code, price
                            FROM get_costs P
-                           WHERE NOT EXISTS (SELECT *
-                                             FROM get_costs T
-                                             WHERE T.c1_code = P.c1_code --STOPPED WORKING HERE
-SELECT *
-FROM get_costs
+                           WHERE P.c1_code > P.c2_code
+                           AND P.c2_code > P.c3_code)
+                           
+                           
+SELECT c1_code, c2_code, CASE
+                            WHEN c3_code = -1
+                            THEN ' '
+                            ELSE to_char(c3_code)
+                         END AS last_code, price
+FROM remove_duplicates
 ORDER BY price ASC;
 
 
