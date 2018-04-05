@@ -23,19 +23,14 @@ ORDER BY salaries.pay_rate DESC;
 
 --3-------comp's total costs in desc order------
 ----------checked with hourly and salary, and with job histories
-WITH needed_info AS (SELECT position.comp_id, works.per_id, position.pay_rate, position.pay_type
-                     FROM works, position
-                     WHERE works.pos_code = position.pos_code
-                     AND works.end_date > SYSDATE),
-     costs AS (SELECT comp_id, per_id, CASE 
-                                            WHEN P.pay_type = 'salary' THEN P.pay_rate
-                                            ELSE P.pay_rate * 1920
-                                       END AS real_cost
-               FROM needed_info P)
-SELECT comp_id, SUM(real_cost) AS total_cost
-FROM costs
+SELECT comp_id, SUM( CASE
+                         WHEN pay_type = 'salary' THEN pay_rate
+                         ELSE pay_rate * 1920
+                     END) AS total_cost
+FROM works NATURAL JOIN position
+WHERE works.end_date > SYSDATE
 GROUP BY comp_id
-ORDER BY total_cost DESC;
+ORDER BY total_cost;
                      
 --4------positions a person is working in now or in the past
 -----tested sufficiently
@@ -116,7 +111,7 @@ FROM (SELECT c_code, title, sec_no, complete_date
                                                                       FROM teaches T
                                                                       WHERE T.c_code = P.c_code))
                                                      )
-     WHERE section.complete_date > SYSDATE
+     WHERE section.complete_date > SYSDATE --************************************************
      ORDER BY section.complete_date
       )
 WHERE rownum = 1;

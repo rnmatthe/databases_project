@@ -2,7 +2,6 @@
 --drop tables
 ---------------------------
 drop table phone;
-drop table comp_naics;
 drop table works;
 drop table requires;
 drop table position;
@@ -197,14 +196,6 @@ create table takes(
     foreign key (c_code, sec_no, complete_date) references section
 );
 
-create table comp_naics(
-    comp_id number,
-    ind_code number,
-    
-    primary key (comp_id, ind_code),
-    foreign key (ind_code) references naics,
-    foreign key (comp_id) references company
-);
 
 
 -----------------------
@@ -212,12 +203,11 @@ create table comp_naics(
 ------------------------
 
 --person
-insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (1, 'Lolita Pottberry', '4th', 6, 'Albany', 'New York', 12262, 'lpottberry0@blog.com', 'female');
-insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (2, 'Lemar Iban', 'Oxford', 156, 'Winston', 'North Carolina', 27157, 'lban1@ow.ly', 'male');
-insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (3, 'Ferdinande Koche', 'Maple Wood', 201, 'Asheville', 'North Carolina', 28805, 'fkoche2@tinypic.com', 'female');
-insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (4, 'Tobiah Faveryear', 'Hayes', 107, 'Rockville', 'Maryland', 20851, 'tfaveryear3@cdc.gov', 'male');
-insert into person(per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (5, 'Elke Lenham', 'Arkansas', 202, 'Miami', 'Florida', 33129, 'elenham4@marr.com', 'female');
-
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (1, 'Lolita Pottberry', '4th', 6, 'Albany', 'New York', 12262, 'lpottberry0@blog.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (2, 'Lemar Iban', 'Oxford', 156, 'Winston', 'North Carolina', 27157, 'lban1@ow.ly', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (3, 'Ferdinande Koche', 'Maple Wood', 201, 'Asheville', 'North Carolina', 28805, 'fkoche2@tinypic.com', 'female');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (4, 'Tobiah Faveryear', 'Hayes', 107, 'Rockville', 'Maryland', 20851, 'tfaveryear3@cdc.gov', 'male');
+insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (5, 'Elke Lenham', 'Arkansas', 202, 'Miami', 'Florida', 33129, 'elenham4@marr.com', 'female');
 insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (6, 'Harli Ives', 'Prairie Rose', 5, 'Hampton', 'Virginia', 23663, 'hives5@ocn.ne.jp', 'female');
 insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (7, 'Adria De Ath', 'Golf', 08907, 'Washington', 'District of Columbia', 20430, 'ade6@kickstarter.com', 'female');
 insert into person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) values (8, 'Karola Hayball', 'Daystar', 9236, 'Springfield', 'Virginia', 22156, 'khayball7@loc.gov', 'female');
@@ -274,12 +264,16 @@ insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id) values ( 2
 
 --works
 insert into works(per_id, pos_code, start_date, end_date) values (1, 23, to_date ('02 MAY 1997'), to_date ('03 MAY 2002'));
-insert into works(per_id, pos_code, start_date, end_date) values (2, 24, to_date ('03 MAY 2001'), to_date ('07 MAY 2019'));
-insert into works(per_id, pos_code, start_date, end_date) values (3, 25, to_date ('03 MAY 2001'), to_date ('07 MAY 2019'));
+insert into works(per_id, pos_code, start_date, end_date) values (1, 24, to_date ('02 MAY 1997'), to_date ('03 MAY 2020'));
+insert into works(per_id, pos_code, start_date, end_date) values (2, 24, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
+insert into works(per_id, pos_code, start_date, end_date) values (3, 25, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
 insert into works(per_id, pos_code, start_date, end_date) values (4, 26, to_date ('03 MAY 2001'), to_date ('07 MAY 2011'));
-insert into works(per_id, pos_code, start_date, end_date) values (5, 27, to_date ('03 MAY 2001'), to_date ('07 MAY 2019'));
+insert into works(per_id, pos_code, start_date, end_date) values (5, 27, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
 
+--knowledge skill
+insert into knowledge_skill(ks_code, title, description, skill_level) values (346, 'MySQL', 'query language', 'medium');
 
+--course
 insert into course(c_code, title, description, status, retail_price) values (123, 'Alpacas', 'Alpaca farming', 'active', 100);
 
 
