@@ -93,7 +93,7 @@ create table works(
 create table course(
 	c_code number,
 	title varchar(20),
-	description varchar(30),
+	description varchar(50),
 	status varchar(8) check (status = 'expired' or status = 'active'),
 	retail_price number check (retail_price > 0),
 
@@ -284,9 +284,30 @@ insert into falls_under(ks_code, cc_code) values ( 478, 'PSE');
 insert into falls_under(ks_code, cc_code) values ( 301, 'DM');
 insert into falls_under(ks_code, cc_code) values ( 451, 'WDA');
 
+--has_skill
+insert into has_skill(per_id, ks_code) values (1, 346);
+insert into has_skill(per_id, ks_code) values (1, 301);
+insert into has_skill(per_id, ks_code) values (2, 301);
+
+--requires
+insert into requires(pos_code, ks_code, prefer) values (23, 346, null);
+insert into requires(pos_code, ks_code, prefer) values (23, 478, null);
+insert into requires(pos_code, ks_code, prefer) values (23, 301, null);
+
 
 --course
-insert into course(c_code, title, description, status, retail_price) values (123, 'Alpacas', 'Alpaca farming', 'active', 100);
+insert into course(c_code, title, description, status, retail_price) values (123, 'Specail Topics', 'Survey of different topics', 'active', 100);
+insert into course(c_code, title, description, status, retail_price) values (223, 'Adv. Specail Topics', 'Adv. Survey of different topics', 'active', 200);
 
+--teaches
+insert into teaches(c_code, ks_code) values (123, 346);
+insert into teaches(c_code, ks_code) values (123, 478);
+insert into teaches(c_code, ks_code) values (223, 346);
+insert into teaches(c_code, ks_code) values (223, 478);
+insert into teaches(c_code, ks_code) values (223, 301);
+
+--section
+insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (123, 601, to_date('10 MAY 2019'), 2019, 'UNO', 'online');
+insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (223, 601, to_date('10 AUGUST 2019'), 2019, 'UNO', 'online');
 
 insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (123, 101, date '2001-01-01', 2001, 'UNO', 'online');

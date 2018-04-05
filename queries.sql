@@ -40,12 +40,14 @@ WHERE person.per_id = works.per_id
 AND person.per_id = 1;
 
 --5-----skill code and title that a person has-------
+-----tested, works
 SELECT knowledge_skill.ks_code, knowledge_skill.title
 FROM has_skill, knowledge_skill
 WHERE has_skill.ks_code = knowledge_skill.ks_code
 AND per_id = 1;
 
---6-------------------------------
+--6-----skill gap b/t a worker's position and their skills
+-----tested, works
 WITH needed_skills AS (SELECT knowledge_skill.ks_code, knowledge_skill.title
                   FROM knowledge_skill, requires, works
                   WHERE knowledge_skill.ks_code = requires.ks_code
@@ -60,27 +62,29 @@ FROM needed_skills MINUS (SELECT knowledge_skill.ks_code, knowledge_skill.title
 
 --7--
 
---8-------------------------------
+--8------person's missing skills for a specific pos_code
+---------tested, works
 WITH needed_skills AS (SELECT knowledge_skill.ks_code, knowledge_skill.title
                        FROM knowledge_skill, requires
                        WHERE knowledge_skill.ks_code = requires.ks_code
-                       AND requires.pos_code = 1)
+                       AND requires.pos_code = 23)
 SELECT ks_code, title
-FROM needed_skills MINUS (SELECT knowledge_skill.ks_code, knowledge_skill.title
-                          FROM knowledge_skill, requires
-                          WHERE knowledge_skill.ks_code = requires.ks_code
-                          AND requires.pos_code = 23);
+FROM needed_skills MINUS (SELECT has_skill.ks_code, knowledge_skill.title
+                          FROM has_skill, knowledge_skill
+                          WHERE per_id = 2
+                          AND has_skill.ks_code = knowledge_skill.ks_code);
                           
---9
+--9---courses that alone teach all the missing knowledge
+-----tested, works
 WITH skills_needed AS ((SELECT knowledge_skill.ks_code
                        FROM knowledge_skill, requires
                        WHERE knowledge_skill.ks_code = requires.ks_code
-                       AND requires.pos_code = 1)
+                       AND requires.pos_code = 23)
                        MINUS
                        (SELECT has_skill.ks_code
                         FROM has_skill
-                        WHERE per_id = 1))
-SELECT c_code, title
+                        WHERE per_id = 2))
+SELECT DISTINCT(c_code), title
 FROM course NATURAL JOIN (SELECT c_code
                           FROM teaches P
                           WHERE NOT EXISTS ((SELECT *
@@ -91,15 +95,16 @@ FROM course NATURAL JOIN (SELECT c_code
                                              WHERE T.c_code = P.c_code))
                          );
 
---10----------------------------
+--10----find quickest course to get skills
+--------tested, works
 WITH skills_needed AS ((SELECT knowledge_skill.ks_code
                        FROM knowledge_skill, requires
                        WHERE knowledge_skill.ks_code = requires.ks_code
-                       AND requires.pos_code = 1)
+                       AND requires.pos_code = 23)
                        MINUS
                        (SELECT has_skill.ks_code
                         FROM has_skill
-                        WHERE per_id = 1))
+                        WHERE per_id = 2))
 SELECT *
 FROM (SELECT c_code, title, sec_no, complete_date
       FROM section NATURAL JOIN course NATURAL JOIN (SELECT c_code
@@ -111,7 +116,7 @@ FROM (SELECT c_code, title, sec_no, complete_date
                                                                       FROM teaches T
                                                                       WHERE T.c_code = P.c_code))
                                                      )
-     WHERE section.complete_date > SYSDATE --************************************************
+     WHERE section.complete_date > SYSDATE 
      ORDER BY section.complete_date
       )
 WHERE rownum = 1;
