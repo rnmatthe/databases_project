@@ -293,11 +293,18 @@ insert into has_skill(per_id, ks_code) values (2, 301);
 insert into requires(pos_code, ks_code, prefer) values (23, 346, null);
 insert into requires(pos_code, ks_code, prefer) values (23, 478, null);
 insert into requires(pos_code, ks_code, prefer) values (23, 301, null);
+insert into requires(pos_code, ks_code, prefer) values (26, 346, null);
+insert into requires(pos_code, ks_code, prefer) values (26, 478, null);
+insert into requires(pos_code, ks_code, prefer) values (26, 301, null);
+insert into requires(pos_code, ks_code, prefer) values (26, 451, null);
 
 
 --course
-insert into course(c_code, title, description, status, retail_price) values (123, 'Specail Topics', 'Survey of different topics', 'active', 100);
+insert into course(c_code, title, description, status, retail_price) values (123, 'Specail Topics', 'Survey of different topics', 'active', 300);
 insert into course(c_code, title, description, status, retail_price) values (223, 'Adv. Specail Topics', 'Adv. Survey of different topics', 'active', 200);
+insert into course(c_code, title, description, status, retail_price) values (238, 'Web and Other', 'Web dev and other stuff', 'active', 200);
+insert into course(c_code, title, description, status, retail_price) values (350, 'Digital Art', 'FireAlpaca use and practice', 'active', 200);
+insert into course(c_code, title, description, status, retail_price) values (187, 'Web Design', 'Web Design and Development', 'active', 200);
 
 --teaches
 insert into teaches(c_code, ks_code) values (123, 346);
@@ -306,8 +313,14 @@ insert into teaches(c_code, ks_code) values (223, 346);
 insert into teaches(c_code, ks_code) values (223, 478);
 insert into teaches(c_code, ks_code) values (223, 301);
 
+insert into teaches(c_code, ks_code) values (238, 346);
+insert into teaches(c_code, ks_code) values (238, 451);
+insert into teaches(c_code, ks_code) values (350, 301);
+insert into teaches(c_code, ks_code) values (187, 301);
+insert into teaches(c_code, ks_code) values (187, 451);
+
 --section
 insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (123, 601, to_date('10 MAY 2019'), 2019, 'UNO', 'online');
-insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (223, 601, to_date('10 AUGUST 2019'), 2019, 'UNO', 'online');
+insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (223, 601, to_date('10 MARCH 2019'), 2019, 'UNO', 'online');
 
 insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (123, 101, date '2001-01-01', 2001, 'UNO', 'online');
