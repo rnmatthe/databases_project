@@ -314,44 +314,22 @@ WITH needed_skills AS ((SELECT ks_code
                                   FROM legit_three T
                                   WHERE T.c1_code = P.c1_code
                                   AND T.c2_code = P.c2_code
-                                  AND T.c3_code = P.c3_code)) -----good to this point :D
+                                  AND T.c3_code = P.c3_code)), -----good to this point :D
+     get_costs AS (SELECT c1_code, c2_code, c3_code, SUM (retail_price) AS price
+                   FROM combine_legit, course
+                   WHERE c_code = c1_code
+                   OR c_code = c2_code
+                   OR c_code = c3_code
+                   GROUP BY c1_code, c2_code, c3_code),--good to this point
+     remove_duplicates AS (SELECT c1_code, c2_code, c3_code, price
+                           FROM get_costs P
+                           WHERE NOT EXISTS (SELECT *
+                                             FROM get_costs T
+                                             WHERE T.c1_code = P.c1_code --STOPPED WORKING HERE
 SELECT *
-FROM combine_legit;
-                    
-                    
-     with_costs AS (SELECT c1_code, c2_code, c3_code, course.retail_price
-                    FROM legit_three, course
-                    WHERE legit_three.c1_code = course.c_code
-                    OR legit_three.c2_code = course.c_code
-                    OR legit_three.c3_code = course.c_code),
-     sum_costs AS (SELECT c1_code, c2_code, c3_code, SUM (retail_price) AS price
-                   FROM with_costs 
-                   GROUP BY c1_code, c2_code, c3_code),
-     concat AS (SELECT CASE
-                            WHEN P.c3_code IS NULL
-                            THEN CASE
-                                     WHEN P.c1_code < P.c2_code
-                                         THEN TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c2_code)
-                                     ELSE TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c1_code)
-                                 END  
-                            ELSE CASE 
-                                     WHEN P.c1_code < P.c2_code AND P.c2_code < P.c3_code--123
-                                          THEN TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c3_code)
-                                     WHEN P.c1_code < P.c3_code AND P.c3_code < P.c2_code--132
-                                          THEN TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c2_code)
-                                     WHEN P.c2_code < P.c1_code AND P.c1_code < P.c3_code--213
-                                          THEN TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c3_code)
-                                     WHEN P.c2_code < P.c3_code AND P.c3_code < P.c1_code--231
-                                          THEN TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c1_code)
-                                     WHEN P.c3_code < P.c1_code AND P.c1_code < P.c2_code--312
-                                          THEN TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c1_code) || ', ' || TO_CHAR(P.c2_code)
-                                     ELSE TO_CHAR(P.c3_code) || ', ' || TO_CHAR(P.c2_code) || ', ' || TO_CHAR(P.c1_code)
-                                 END   
-                       END AS courses, price
-                FROM sum_costs P)
-SELECT DISTINCT(courses), price
-FROM concat
+FROM get_costs
 ORDER BY price ASC;
+
 
 --13--job categories that they're qualified for
 
