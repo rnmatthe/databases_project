@@ -225,13 +225,13 @@ WITH needed_skills AS ((SELECT ks_code
                                   FROM legit_three T
                                   WHERE T.c1_code = P.c1_code
                                   AND T.c2_code = P.c2_code
-                                  AND T.c3_code = P.c3_code)), -----good to this point :D
+                                  AND T.c3_code = P.c3_code)), 
      get_costs AS (SELECT c1_code, c2_code, c3_code, SUM (retail_price) AS price
                    FROM combine_legit, course
                    WHERE c_code = c1_code
                    OR c_code = c2_code
                    OR c_code = c3_code
-                   GROUP BY c1_code, c2_code, c3_code),--good to this point
+                   GROUP BY c1_code, c2_code, c3_code),
      remove_duplicates AS (SELECT c1_code, c2_code, c3_code, price
                            FROM get_costs P
                            WHERE P.c1_code > P.c2_code
