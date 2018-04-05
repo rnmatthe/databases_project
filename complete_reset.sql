@@ -59,7 +59,6 @@ create table position(
 create table naics(
     ind_code number,
     ind_title varchar(72),
-    parent_ind number,
     
     primary key (ind_code)
 );

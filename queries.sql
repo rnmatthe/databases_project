@@ -394,3 +394,5 @@ AND EXISTS (SELECT *
 
 
 --25
+
+--can skip 26, 27, 28
