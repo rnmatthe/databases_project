@@ -226,24 +226,22 @@ WITH needed_skills AS ((SELECT ks_code
                                   WHERE T.c1_code = P.c1_code
                                   AND T.c2_code = P.c2_code
                                   AND T.c3_code = P.c3_code)), 
+     remove_duplicates AS (SELECT c1_code, c2_code, c3_code
+                           FROM combine_legit P
+                           WHERE P.c1_code > P.c2_code
+                           AND P.c2_code > P.c3_code),
      get_costs AS (SELECT c1_code, c2_code, c3_code, SUM (retail_price) AS price
-                   FROM combine_legit, course
+                   FROM remove_duplicates, course
                    WHERE c_code = c1_code
                    OR c_code = c2_code
                    OR c_code = c3_code
-                   GROUP BY c1_code, c2_code, c3_code),
-     remove_duplicates AS (SELECT c1_code, c2_code, c3_code, price
-                           FROM get_costs P
-                           WHERE P.c1_code > P.c2_code
-                           AND P.c2_code > P.c3_code)
-                           
-                           
+                   GROUP BY c1_code, c2_code, c3_code)
 SELECT c1_code, c2_code, CASE
                             WHEN c3_code = -1
                             THEN ' '
                             ELSE to_char(c3_code)
                          END AS last_code, price
-FROM remove_duplicates
+FROM get_costs
 ORDER BY price ASC;
 
 
