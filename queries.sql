@@ -390,6 +390,19 @@ AND EXISTS (SELECT *
 --24-- job distributions among business sectors
 --------------------------max employees and max salaries/wages (two queries)
 
+--max employees:
+WITH people_per_sector AS (SELECT ind_code, COUNT(per_id) AS num_people
+                           FROM company NATURAL JOIN position NATURAL JOIN works
+                           WHERE end_date > SYSDATE
+                           GROUP BY ind_code),
+     max_people AS (SELECT MAX(num_people) AS max_num
+                    FROM people_per_sector)
+SELECT ind_code, num_people
+FROM people_per_sector, max_people
+WHERE num_people = max_num;
+
+--max paid to employees:
+
 
 --25
 
