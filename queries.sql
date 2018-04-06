@@ -391,6 +391,7 @@ AND EXISTS (SELECT *
 --------------------------max employees and max salaries/wages (two queries)
 
 --max employees:
+----tested, works
 WITH people_per_sector AS (SELECT ind_code, COUNT(per_id) AS num_people
                            FROM company NATURAL JOIN position NATURAL JOIN works
                            WHERE end_date > SYSDATE
@@ -402,6 +403,22 @@ FROM people_per_sector, max_people
 WHERE num_people = max_num;
 
 --max paid to employees:
+-----tested, not confirmed
+WITH needed_info AS (SELECT ind_code, per_id, pos_code, CASE
+                                                        WHEN pay_type = 'salary'
+                                                        THEN pay_rate
+                                                        ELSE pay_rate * 1920
+                                                        END AS payment
+                     FROM company NATURAL JOIN position NATURAL JOIN works
+                     WHERE end_date > SYSDATE),
+     totals AS (SELECT ind_code, SUM(payment) AS total_spent
+                FROM needed_info
+                GROUP BY ind_code),
+     max_spent AS (SELECT MAX(total_spent) AS the_max
+                   FROM totals)
+SELECT ind_code, total_spent
+FROM totals, max_spent
+WHERE totals.total_spent = max_spent.the_max;
 
 
 --25
