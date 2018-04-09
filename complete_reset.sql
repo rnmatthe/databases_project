@@ -279,6 +279,8 @@ insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code)
 --works
 insert into works(per_id, pos_code, start_date, end_date) values (1, 23, to_date ('02 MAY 1997'), to_date ('03 MAY 2002'));
 insert into works(per_id, pos_code, start_date, end_date) values (1, 24, to_date ('02 MAY 1997'), to_date ('03 MAY 2020'));
+insert into works(per_id, pos_code, start_date, end_date) values (7, 24, to_date ('02 MAY 2000'), to_date ('03 MAY 2020'));
+insert into works(per_id, pos_code, start_date, end_date) values (7, 23, to_date ('02 MAY 1997'), to_date ('03 MAY 2000'));
 insert into works(per_id, pos_code, start_date, end_date) values (2, 24, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
 insert into works(per_id, pos_code, start_date, end_date) values (3, 25, to_date ('03 MAY 2001'), to_date ('03 MAY 2020'));
 insert into works(per_id, pos_code, start_date, end_date) values (4, 26, to_date ('03 MAY 2001'), to_date ('07 MAY 2011'));
@@ -306,6 +308,8 @@ insert into has_skill(per_id, ks_code) values (5, 478);
 insert into has_skill(per_id, ks_code) values (6, 478);
 insert into has_skill(per_id, ks_code) values (6, 346);
 insert into has_skill(per_id, ks_code) values (7, 301);
+insert into has_skill(per_id, ks_code) values (8, 346);
+insert into has_skill(per_id, ks_code) values (8, 301);
 
 --requires
 insert into requires(pos_code, ks_code, prefer) values (23, 346, null);
@@ -334,7 +338,6 @@ insert into teaches(c_code, ks_code) values (123, 478);
 insert into teaches(c_code, ks_code) values (223, 346);
 insert into teaches(c_code, ks_code) values (223, 478);
 insert into teaches(c_code, ks_code) values (223, 301);
-
 insert into teaches(c_code, ks_code) values (238, 346);
 insert into teaches(c_code, ks_code) values (238, 451);
 insert into teaches(c_code, ks_code) values (350, 301);
@@ -344,5 +347,9 @@ insert into teaches(c_code, ks_code) values (187, 451);
 --section
 insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (123, 601, to_date('10 MAY 2019'), 2019, 'UNO', 'online');
 insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (223, 601, to_date('10 MARCH 2019'), 2019, 'UNO', 'online');
-
 insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (123, 101, date '2001-01-01', 2001, 'UNO', 'online');
+insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format) values (223, 201, to_date('10 MARCH 2019'), 2019, 'UNO', 'online');
+
+--core_skill
+insert into core_skill(cate_code, cc_code) values (78, 'DDA');
+insert into core_skill(cate_code, cc_code) values (78, 'DM');
