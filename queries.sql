@@ -60,7 +60,23 @@ FROM needed_skills MINUS (SELECT knowledge_skill.ks_code, knowledge_skill.title
                           WHERE has_skill.ks_code = knowledge_skill.ks_code
                           AND has_skill.per_id = 1);
 
---7--
+--7---required knowledge skills of a specific job, and of a specific category (2 queries)
+------tested, works
+WITH position_skills as (SELECT requires.pos_code, knowledge_skill.title, knowledge_skill.ks_code
+                         FROM requires, knowledge_skill
+                         WHERE requires.ks_code = knowledge_skill.ks_code
+                         AND requires.pos_code = 23)
+SELECT pos_code, title required_skill, ks_code
+FROM position_skills;
+
+WITH category_skills as (SELECT core_skill.cate_code, knowledge_skill.title, knowledge_skill.ks_code
+                         FROM core_skill, falls_under, knowledge_skill
+                         WHERE knowledge_skill.ks_code = falls_under.ks_code
+                         AND core_skill.cc_code = falls_under.cc_code
+                         AND core_skill.cate_code = 78)
+SELECT cate_code, title required_skill, ks_code
+FROM category_skills;
+
 
 --8------person's missing skills for a specific pos_code
 ---------tested, works
@@ -97,29 +113,30 @@ FROM course NATURAL JOIN (SELECT c_code
 
 --10----find quickest course to get skills
 --------tested, works
-WITH skills_needed AS ((SELECT knowledge_skill.ks_code
-                       FROM knowledge_skill, requires
-                       WHERE knowledge_skill.ks_code = requires.ks_code
-                       AND requires.pos_code = 23)
+WITH skills_needed AS ((SELECT ks_code
+                       FROM requires
+                       WHERE pos_code = 23)
                        MINUS
-                       (SELECT has_skill.ks_code
+                       (SELECT ks_code
                         FROM has_skill
-                        WHERE per_id = 2))
-SELECT *
-FROM (SELECT c_code, title, sec_no, complete_date
-      FROM section NATURAL JOIN course NATURAL JOIN (SELECT c_code
-                                                     FROM teaches P
-                                                     WHERE NOT EXISTS ((SELECT *
-                                                                      FROM skills_needed)
-                                                                      MINUS
-                                                                      (SELECT ks_code
-                                                                      FROM teaches T
-                                                                      WHERE T.c_code = P.c_code))
-                                                     )
-     WHERE section.complete_date > SYSDATE 
-     ORDER BY section.complete_date
-      )
-WHERE rownum = 1;
+                        WHERE per_id = 2)),
+    relevent_sections AS (SELECT c_code, title, sec_no, complete_date
+                         FROM section NATURAL JOIN course NATURAL JOIN (SELECT c_code
+                                                                        FROM teaches P
+                                                                        WHERE NOT EXISTS ((SELECT *
+                                                                        FROM skills_needed)
+                                                                        MINUS
+                                                                       (SELECT ks_code
+                                                                        FROM teaches T
+                                                                        WHERE T.c_code = P.c_code))
+                                                                        )
+                         WHERE section.complete_date > SYSDATE 
+                         ),
+    closest_date AS (SELECT MIN(complete_date) AS min_date
+                     FROM relevent_sections)
+SELECT DISTINCT c_code, title, sec_no, complete_date
+FROM relevent_sections, closest_date
+WHERE complete_date = min_date;
 
 --11----cheapest course to fill skill gap
 ---------tested, works
@@ -130,22 +147,24 @@ WITH skills_needed AS ((SELECT knowledge_skill.ks_code
                        MINUS
                        (SELECT has_skill.ks_code
                         FROM has_skill
-                        WHERE per_id = 2))
-SELECT *
-FROM (SELECT c_code, title, sec_no, complete_date, retail_price
-      FROM section NATURAL JOIN course NATURAL JOIN (SELECT c_code
-                                                     FROM teaches P
-                                                     WHERE NOT EXISTS ((SELECT *
-                                                                      FROM skills_needed)
-                                                                      MINUS
-                                                                      (SELECT ks_code
-                                                                      FROM teaches T
-                                                                      WHERE T.c_code = P.c_code))
-                                                     )
-     WHERE section.complete_date > SYSDATE
-     ORDER BY course.retail_price
-      )
-WHERE rownum = 1;                                                 
+                        WHERE per_id = 2)),
+    relevent_sections AS (SELECT c_code, title, sec_no, complete_date, retail_price
+                          FROM section NATURAL JOIN course NATURAL JOIN (SELECT c_code
+                                                                         FROM teaches P
+                                                                         WHERE NOT EXISTS ((SELECT *
+                                                                                            FROM skills_needed)
+                                                                                            MINUS
+                                                                                           (SELECT ks_code
+                                                                                            FROM teaches T
+                                                                                            WHERE T.c_code = P.c_code))
+                                                                         )
+                          WHERE section.complete_date > SYSDATE
+                          ORDER BY course.retail_price
+                          ),
+    cheapest AS (SELECT MIN(retail_price) AS retail_price
+                 FROM relevent_sections)
+SELECT DISTINCT c_code, title, sec_no, complete_date, retail_price
+FROM relevent_sections NATURAL JOIN cheapest;                      
 
 --12--course sets that would make someone qualified (3 or less)
 -----tested, works
@@ -247,6 +266,7 @@ ORDER BY price ASC;
 
 --13--job categories that they're qualified for
 
+
 --14--position with highest payrate according to their skills given pid 
 ------tested, works
 WITH per_skills AS (SELECT ks_code
@@ -269,7 +289,19 @@ FROM qualified_for, position, max_salary
 WHERE qualified_for.pos_code = position.pos_code
 AND position.pay_rate = max_salary.max_sal;
 
---15
+--15-----people qualified for a specific job
+--------tested, works
+WITH needed_skills AS (SELECT ks_code
+                       FROM requires
+                       WHERE pos_code = 25)
+SELECT per_name, email
+FROM person P
+WHERE NOT EXISTS ((SELECT ks_code
+                   FROM needed_skills)
+                   MINUS
+                  (SELECT ks_code
+                   FROM has_skill T
+                   WHERE T.per_id = P.per_id));
 
 --16 ------"missing one" skill list
 ----------tested, works
@@ -369,8 +401,17 @@ SELECT ks_code, num_people
 FROM missing_k_skills
 ORDER BY num_people ASC;
 
+--21----people who once held a job category - per_id, name, possition title, *******************************************************
+--start and end year
+SELECT person.per_id, per_name, position.pos_code, EXTRACT(YEAR FROM start_date), EXTRACT(YEAR FROM end_date)
+FROM person, works, position
+WHERE cate_code = 78
+AND end_date < SYSDATE
+AND person.per_id = works.per_id
+AND works.pos_code = position.pos_code;
 
---21
+SELECT per_id
+FROM works NATURAL JOIN position;
 
 --22--unemployed ppl once held position
 ------tested, works
@@ -385,11 +426,38 @@ AND EXISTS (SELECT *
             WHERE W.pos_code = 26
             AND W.per_id = P.per_id);
             
---23
+--23--
+----biggest employer in terms of number of employees ******************************************************************
+WITH num_employees AS (SELECT comp_id, COUNT(per_id) AS num_emp
+                       FROM works NATURAL JOIN position
+                       WHERE end_date > SYSDATE
+                       GROUP BY comp_id),
+     max_num AS (SELECT MAX(num_emp) AS max_emp
+                 FROM num_employees)
+SELECT comp_id, num_emp
+FROM num_employees, max_num
+WHERE num_emp = max_emp;
+
+---by number paid each employee ***************************************************************************************
+WITH amount_paid AS (SELECT per_id, pos_code, comp_id, CASE
+                                                       WHEN pay_type = 'salary'
+                                                       THEN pay_rate
+                                                       ELSE pay_rate * 1920
+                                                       END AS pay
+                     FROM works NATURAL JOIN position
+                     WHERE end_date > SYSDATE),
+    total_paid AS (SELECT comp_id, SUM(pay) AS total
+                   FROM amount_paid
+                   GROUP BY comp_id),
+    max_paid AS (SELECT MAX(total) AS max_total
+                 FROM total_paid)
+SELECT comp_id, total
+FROM total_paid, max_paid
+WHERE total = max_total;
+
 
 --24-- job distributions among business sectors
 --------------------------max employees and max salaries/wages (two queries)
-
 --max employees:
 ----tested, works
 WITH people_per_sector AS (SELECT ind_code, COUNT(per_id) AS num_people
@@ -403,7 +471,7 @@ FROM people_per_sector, max_people
 WHERE num_people = max_num;
 
 --max paid to employees:
------tested, not confirmed
+-----tested, works
 WITH needed_info AS (SELECT ind_code, per_id, pos_code, CASE
                                                         WHEN pay_type = 'salary'
                                                         THEN pay_rate
@@ -421,6 +489,63 @@ FROM totals, max_spent
 WHERE totals.total_spent = max_spent.the_max;
 
 
---25
+--25--
+--number of people whose earning increased
+-----tested, works
+WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
+                                                      WHEN pay_type = 'salary'
+                                                      THEN pay_rate
+                                                      ELSE pay_rate * 1920
+                                                      END AS pay
+                   FROM works NATURAL JOIN position
+                   WHERE end_date < SYSDATE),
+    most_recent AS (SELECT per_id, pay, end_date
+                    FROM past_jobs P
+                    WHERE P.end_date = (SELECT MAX(end_date)
+                                        FROM past_jobs T
+                                        WHERE T.per_id = P.per_id)
+                    ),
+    current_pay AS (SELECT per_id, CASE
+                                   WHEN pay_type = 'salary'
+                                   THEN pay_rate
+                                   ELSE pay_rate * 1920
+                                   END AS pay
+                    FROM works NATURAL JOIN position
+                    WHERE end_date > SYSDATE),
+    difference AS (SELECT DISTINCT current_pay.per_id, current_pay.pay - most_recent.pay AS pay_change
+                   FROM current_pay, most_recent
+                   WHERE current_pay.per_id = most_recent.per_id)
+SELECT COUNT(per_id)
+FROM difference
+WHERE pay_change > 0;
+
+---- number whose earnings decreased
+----tested, works
+WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
+                                                      WHEN pay_type = 'salary'
+                                                      THEN pay_rate
+                                                      ELSE pay_rate * 1920
+                                                      END AS pay
+                   FROM works NATURAL JOIN position
+                   WHERE end_date < SYSDATE),
+    most_recent AS (SELECT per_id, pay, end_date
+                    FROM past_jobs P
+                    WHERE P.end_date = (SELECT MAX(end_date)
+                                        FROM past_jobs T
+                                        WHERE T.per_id = P.per_id)
+                    ),
+    current_pay AS (SELECT per_id, CASE
+                                   WHEN pay_type = 'salary'
+                                   THEN pay_rate
+                                   ELSE pay_rate * 1920
+                                   END AS pay
+                    FROM works NATURAL JOIN position
+                    WHERE end_date > SYSDATE),
+    difference AS (SELECT DISTINCT current_pay.per_id, current_pay.pay - most_recent.pay AS pay_change
+                   FROM current_pay, most_recent
+                   WHERE current_pay.per_id = most_recent.per_id)
+SELECT COUNT(per_id)
+FROM difference
+WHERE pay_change < 0;
 
 --can skip 26, 27, 28
