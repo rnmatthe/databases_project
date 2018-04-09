@@ -265,6 +265,7 @@ ORDER BY price ASC;
 
 
 --13--job categories that they're qualified for
+------tested, works
 WITH required_skills AS (SELECT ks_code, cate_code
                          FROM core_skill NATURAL JOIN falls_under),
      qualified_for AS (SELECT DISTINCT cate_code
@@ -413,17 +414,14 @@ SELECT ks_code, num_people
 FROM missing_k_skills
 ORDER BY num_people ASC;
 
---21----people who once held a job category - per_id, name, possition title, *******************************************************
+--21----people who once held a job category - per_id, name, possition title,
 --start and end year
-SELECT person.per_id, per_name, position.pos_code, EXTRACT(YEAR FROM start_date), EXTRACT(YEAR FROM end_date)
+SELECT person.per_id, per_name, position.pos_code, EXTRACT(YEAR FROM start_date) AS start_year, EXTRACT(YEAR FROM end_date) AS end_year
 FROM person, works, position
 WHERE cate_code = 78
 AND end_date < SYSDATE
 AND person.per_id = works.per_id
 AND works.pos_code = position.pos_code;
-
-SELECT per_id
-FROM works NATURAL JOIN position;
 
 --22--unemployed ppl once held position
 ------tested, works
@@ -439,7 +437,8 @@ AND EXISTS (SELECT *
             AND W.per_id = P.per_id);
             
 --23--
-----biggest employer in terms of number of employees ******************************************************************
+----biggest employer in terms of number of employees 
+----tested, works
 WITH num_employees AS (SELECT comp_id, COUNT(per_id) AS num_emp
                        FROM works NATURAL JOIN position
                        WHERE end_date > SYSDATE
@@ -450,7 +449,8 @@ SELECT comp_id, num_emp
 FROM num_employees, max_num
 WHERE num_emp = max_emp;
 
----by number paid each employee ***************************************************************************************
+---by number paid each employee 
+--tested, works
 WITH amount_paid AS (SELECT per_id, pos_code, comp_id, CASE
                                                        WHEN pay_type = 'salary'
                                                        THEN pay_rate
@@ -559,5 +559,3 @@ WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
 SELECT COUNT(per_id)
 FROM difference
 WHERE pay_change < 0;
-
---can skip 26, 27, 28
