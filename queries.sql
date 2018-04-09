@@ -265,7 +265,19 @@ ORDER BY price ASC;
 
 
 --13--job categories that they're qualified for
-
+WITH required_skills AS (SELECT ks_code, cate_code
+                         FROM core_skill NATURAL JOIN falls_under),
+     qualified_for AS (SELECT DISTINCT cate_code
+                       FROM required_skills P
+                       WHERE NOT EXISTS ((SELECT ks_code
+                                          FROM required_skills T
+                                          WHERE T.cate_code = P.cate_code)
+                                          MINUS
+                                         (SELECT ks_code
+                                          FROM has_skill
+                                          WHERE per_id = 1)))
+SELECT cate_code, cate_title
+FROM qualified_for NATURAL JOIN job_category;
 
 --14--position with highest payrate according to their skills given pid 
 ------tested, works
