@@ -73,6 +73,7 @@ create table position(
 create table naics(
     ind_code number,
     ind_title varchar(72),
+    parent_ind number,
     
     primary key (ind_code)
 );
@@ -109,6 +110,7 @@ create table course(
 	description varchar(50),
 	status varchar(8) check (status = 'expired' or status = 'active'),
 	retail_price number check (retail_price > 0),
+	course_level varchar(8),
 
 	primary key (c_code)
 );
@@ -240,7 +242,9 @@ insert into person (per_id, per_name, street_name, street_num, city, state, zip_
 
 
 --job_category
-insert into job_category(cate_code, cate_title, cate_description, pay_range_high, pay_range_low, parent_cate) values (78, 'Blah', 'Blah blah blah', 20000, 10000, 76);
+insert into job_category(cate_code, cate_title, cate_description, pay_range_high, pay_range_low, parent_cate) values (78, 'DB Admin', 'Database Admin', 20000, 10000, null);
+insert into job_category(cate_code, cate_title, cate_description, pay_range_high, pay_range_low, parent_cate) values (79, 'Graphic designer', 'create graphics', 10000, 1000, null);
+insert into job_category(cate_code, cate_title, cate_description, pay_range_high, pay_range_low, parent_cate) values (80, 'C. Designer', 'Character designer', 10000, 1000, 79);
 
 
 --naics
@@ -353,3 +357,4 @@ insert into section(c_code, sec_no, complete_date, year, offered_by, sec_format)
 --core_skill
 insert into core_skill(cate_code, cc_code) values (78, 'DDA');
 insert into core_skill(cate_code, cc_code) values (78, 'DM');
+insert into core_skill(cate_code, cc_code) values (79, 'DM');
