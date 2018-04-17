@@ -37,17 +37,15 @@ WHERE has_skill.ks_code = knowledge_skill.ks_code
 AND per_id = 1;
 
 --6-----skill gap b/t a worker's position and their skills
-WITH needed_skills AS (SELECT knowledge_skill.ks_code, knowledge_skill.title
-                  FROM knowledge_skill, requires, works
-                  WHERE knowledge_skill.ks_code = requires.ks_code
-                  AND requires.pos_code = works.pos_code
+WITH needed_skills AS (SELECT ks_code
+                  FROM requires, works
+                  WHERE requires.pos_code = works.pos_code
                   AND works.per_id = 1
-                  AND works.end_date < to_date (SYSDATE) )
-SELECT ks_code, title
-FROM needed_skills MINUS (SELECT knowledge_skill.ks_code, knowledge_skill.title
-                          FROM has_skill, knowledge_skill
-                          WHERE has_skill.ks_code = knowledge_skill.ks_code
-                          AND has_skill.per_id = 1);
+                  AND works.end_date < SYSDATE )
+SELECT ks_code
+FROM needed_skills MINUS (SELECT ks_code
+                          FROM has_skill 
+                          WHERE per_id = 1);
 
 --7---required knowledge skills of a specific job, and of a specific category (2 queries)
 WITH position_skills as (SELECT requires.pos_code, knowledge_skill.title, knowledge_skill.ks_code
@@ -67,35 +65,30 @@ FROM category_skills;
 
 
 --8------person's missing skills for a specific pos_code
-WITH needed_skills AS (SELECT knowledge_skill.ks_code, knowledge_skill.title
-                       FROM knowledge_skill, requires
-                       WHERE knowledge_skill.ks_code = requires.ks_code
-                       AND requires.pos_code = 23)
-SELECT ks_code, title
-FROM needed_skills MINUS (SELECT has_skill.ks_code, knowledge_skill.title
-                          FROM has_skill, knowledge_skill
-                          WHERE per_id = 2
-                          AND has_skill.ks_code = knowledge_skill.ks_code);
+WITH needed_skills AS (SELECT ks_code
+                       FROM requires
+                       WHERE pos_code = 23)
+SELECT ks_code
+FROM needed_skills MINUS (SELECT ks_code
+                          FROM has_skill
+                          WHERE per_id = 2);
                           
 --9---courses that alone teach all the missing knowledge
-WITH skills_needed AS ((SELECT knowledge_skill.ks_code
-                       FROM knowledge_skill, requires
-                       WHERE knowledge_skill.ks_code = requires.ks_code
-                       AND requires.pos_code = 23)
+WITH skills_needed AS ((SELECT ks_code
+                       FROM requires
+                       WHERE requires.pos_code = 23)
                        MINUS
                        (SELECT has_skill.ks_code
                         FROM has_skill
                         WHERE per_id = 2))
-SELECT DISTINCT(c_code), title
-FROM course NATURAL JOIN (SELECT c_code
-                          FROM teaches P
-                          WHERE NOT EXISTS ((SELECT *
-                                             FROM skills_needed)
-                                             MINUS
-                                            (SELECT ks_code
-                                             FROM teaches T
-                                             WHERE T.c_code = P.c_code))
-                         );
+SELECT DISTINCT c_code
+FROM course P
+WHERE NOT EXISTS ((SELECT *
+                   FROM skills_needed)
+                   MINUS
+                  (SELECT ks_code
+                   FROM teaches T
+                   WHERE T.c_code = P.c_code));
 
 --10----find quickest course to get skills
 WITH skills_needed AS ((SELECT ks_code
@@ -106,15 +99,15 @@ WITH skills_needed AS ((SELECT ks_code
                         FROM has_skill
                         WHERE per_id = 2)),
     relevent_sections AS (SELECT c_code, title, sec_no, complete_date
-                         FROM section NATURAL JOIN course NATURAL JOIN (SELECT c_code
-                                                                        FROM teaches P
-                                                                        WHERE NOT EXISTS ((SELECT *
-                                                                        FROM skills_needed)
-                                                                        MINUS
-                                                                       (SELECT ks_code
-                                                                        FROM teaches T
-                                                                        WHERE T.c_code = P.c_code))
-                                                                        )
+                         FROM section NATURAL JOIN (SELECT c_code
+                                                    FROM course P
+                                                    WHERE NOT EXISTS ((SELECT *
+                                                                       FROM skills_needed)
+                                                                       MINUS
+                                                                      (SELECT ks_code
+                                                                       FROM teaches T
+                                                                       WHERE T.c_code = P.c_code))
+                                                                       )
                          WHERE section.complete_date > SYSDATE 
                          ),
     closest_date AS (SELECT MIN(complete_date) AS min_date
@@ -124,24 +117,23 @@ FROM relevent_sections, closest_date
 WHERE complete_date = min_date;
 
 --11----cheapest course to fill skill gap
-WITH skills_needed AS ((SELECT knowledge_skill.ks_code
-                       FROM knowledge_skill, requires
-                       WHERE knowledge_skill.ks_code = requires.ks_code
-                       AND requires.pos_code = 23)
+WITH skills_needed AS ((SELECT ks_code
+                       FROM requires
+                       WHERE requires.pos_code = 23)
                        MINUS
                        (SELECT has_skill.ks_code
                         FROM has_skill
                         WHERE per_id = 2)),
     relevent_sections AS (SELECT c_code, title, sec_no, complete_date, retail_price
-                          FROM section NATURAL JOIN course NATURAL JOIN (SELECT c_code
-                                                                         FROM teaches P
-                                                                         WHERE NOT EXISTS ((SELECT *
-                                                                                            FROM skills_needed)
-                                                                                            MINUS
-                                                                                           (SELECT ks_code
-                                                                                            FROM teaches T
-                                                                                            WHERE T.c_code = P.c_code))
-                                                                         )
+                          FROM section NATURAL JOIN (SELECT c_code, retial_price
+                                                     FROM course P
+                                                     WHERE NOT EXISTS ((SELECT *
+                                                                        FROM skills_needed)
+                                                                        MINUS
+                                                                       (SELECT ks_code
+                                                                        FROM teaches T
+                                                                        WHERE T.c_code = P.c_code))
+                                                     )
                           WHERE section.complete_date > SYSDATE
                           ORDER BY course.retail_price
                           ),
@@ -472,7 +464,7 @@ WHERE totals.total_spent = max_spent.the_max;
 
 
 --25--
---number of people whose earning increased
+--number of people whose earning increased ***********************************************************************************
 WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
                                                       WHEN pay_type = 'salary'
                                                       THEN pay_rate
@@ -527,3 +519,22 @@ WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
 SELECT COUNT(per_id)
 FROM difference
 WHERE pay_change < 0;
+
+--ratio of increased to decreased
+
+--26--max vacancies due to unqualfied workers
+WITH leaf_cate AS (SELECT cate_code
+                   FROM job_category T
+                   WHERE NOT EXISTS (SELECT parent_cate
+                                     FROM job_category P
+                                     WHERE P.parent_cate = T.cate_code)),
+     emp_pos AS (SELECT pos_code, cate_code
+                 FROM position P
+                 WHERE NOT EXISTS (SELECT pos_code
+                                   FROM works W
+                                   WHERE P.pos_code = W.pos_code
+                                   AND W.end_date > SYSDATE)),
+     vacancies AS (SELECT cate_code, COUNT(pos_code) AS num_vac
+                   FROM leaf_cate NATURAL JOIN emp_poss
+                   GROUP BY cate_code),
+--come back to later
