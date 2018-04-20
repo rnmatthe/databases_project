@@ -142,102 +142,6 @@ WITH skills_needed AS ((SELECT ks_code
 SELECT DISTINCT c_code, title, sec_no, complete_date, retail_price
 FROM relevent_sections NATURAL JOIN cheapest;                      
 
---12--course sets that would make someone qualified (3 or less)
-WITH needed_skills AS ((SELECT ks_code
-                       FROM requires
-                       WHERE pos_code = 26)
-                       MINUS
-                      (SELECT ks_code
-                       FROM has_skill
-                       WHERE per_id = 3)),
-                       
-     relevent_courses AS (SELECT DISTINCT(c_code), ks_code
-                          FROM teaches NATURAL JOIN needed_skills),
-     c1 AS (SELECT *
-            FROM relevent_courses),
-     c2 AS (SELECT *
-            FROM relevent_courses),
-     c3 AS (SELECT *
-            FROM relevent_courses),
-     all_poss AS (SELECT DISTINCT c1.c_code AS c1_code, c2.c_code AS c2_code, c3.c_code AS c3_code
-                  FROM c1, c2, c3
-                  WHERE c1.c_code != c2.c_code
-                  AND c1.c_code != c3.c_code
-                  AND c2.c_code != c3.c_code),
-     covers_all AS (SELECT *
-                    FROM all_poss P
-                    WHERE NOT EXISTS ((SELECT ks_code
-                                       FROM needed_skills)
-                                       MINUS
-                                      (SELECT ks_code
-                                       FROM teaches T
-                                       WHERE T.c_code = P.c1_code
-                                       OR T.c_code = P.c2_code
-                                       OR T.c_code = P.c3_code)
-                                     )
-                   ),
-     find_two AS (SELECT DISTINCT c1_code, c2_code, CASE
-                                                WHEN EXISTS ((SELECT ks_code
-                                                              FROM needed_skills)
-                                                              MINUS
-                                                             (SELECT ks_code
-                                                              FROM teaches T
-                                                              WHERE T.c_code = P.c1_code 
-                                                              OR T.c_code = P.c2_code))
-                                                      THEN c3_code
-                                                ELSE -1 
-                                           END AS c3_code
-                  FROM covers_all P),
-     legit_three AS (SELECT *
-                     FROM find_two P
-                     WHERE EXISTS ((SELECT ks_code
-                                    FROM needed_skills)
-                                    MINUS
-                                   (SELECT ks_code
-                                    FROM teaches NATURAL JOIN relevent_courses
-                                    WHERE c_code = P.c1_code OR c_code = P.c2_code)
-                                   )
-                    AND EXISTS ((SELECT ks_code
-                                 FROM needed_skills)
-                                 MINUS
-                                (SELECT ks_code
-                                 FROM teaches NATURAL JOIN relevent_courses
-                                 WHERE c_code = P.c2_code OR c_code = P.c3_code)
-                                 )
-                    AND EXISTS((SELECT ks_code
-                                FROM needed_skills)
-                                MINUS
-                               (SELECT ks_code
-                                FROM teaches NATURAL JOIN relevent_courses
-                                WHERE c_code = P.c1_code OR c_code = P.c3_code)
-                                )
-                    ),
-     combine_legit AS (SELECT c1_code, c2_code, c3_code
-                       FROM find_two P
-                       WHERE c3_code = -1
-                       OR EXISTS (SELECT *
-                                  FROM legit_three T
-                                  WHERE T.c1_code = P.c1_code
-                                  AND T.c2_code = P.c2_code
-                                  AND T.c3_code = P.c3_code)), 
-     remove_duplicates AS (SELECT c1_code, c2_code, c3_code
-                           FROM combine_legit P
-                           WHERE P.c1_code > P.c2_code
-                           AND P.c2_code > P.c3_code),
-     get_costs AS (SELECT c1_code, c2_code, c3_code, SUM (retail_price) AS price
-                   FROM remove_duplicates, course
-                   WHERE c_code = c1_code
-                   OR c_code = c2_code
-                   OR c_code = c3_code
-                   GROUP BY c1_code, c2_code, c3_code)
-SELECT c1_code, c2_code, CASE
-                            WHEN c3_code = -1
-                            THEN ' '
-                            ELSE to_char(c3_code)
-                         END AS last_code, price
-FROM get_costs
-ORDER BY price ASC;
-
 --12--SIMPLIFIED
 WITH needed_skills AS ((SELECT ks_code
                         FROM requires
@@ -281,9 +185,58 @@ WITH needed_skills AS ((SELECT ks_code
                                      (SELECT ks_code
                                       FROM teaches T
                                       WHERE T.c_code = P.c1_code
-                                      OR T.c_code = P.c2_code)))
-select distinct *
-from legit_two;
+                                      OR T.c_code = P.c2_code))),
+     legit_three AS (SELECT *
+                     FROM covers_all P
+                     WHERE EXISTS ((SELECT ks_code
+                                    FROM needed_skills)
+                                    MINUS
+                                   (SELECT ks_code
+                                    FROM teaches NATURAL JOIN relevent_courses
+                                    WHERE c_code = P.c1_code OR c_code = P.c2_code)
+                                   )
+                    AND EXISTS ((SELECT ks_code
+                                 FROM needed_skills)
+                                 MINUS
+                                (SELECT ks_code
+                                 FROM teaches NATURAL JOIN relevent_courses
+                                 WHERE c_code = P.c2_code OR c_code = P.c3_code)
+                                 )
+                    AND EXISTS((SELECT ks_code
+                                FROM needed_skills)
+                                MINUS
+                               (SELECT ks_code
+                                FROM teaches NATURAL JOIN relevent_courses
+                                WHERE c_code = P.c1_code OR c_code = P.c3_code)
+                                )
+                    ),
+     not_legit_three AS ((SELECT *
+                          FROM covers_all)
+                          MINUS
+                         (SELECT *
+                          FROM legit_three)),
+     combine AS ((SELECT c1_code, c2_code, CASE
+                                            WHEN EXISTS (SELECT c1_code, c2_code
+                                                         FROM legit_two T
+                                                         WHERE P.c1_code = T.c1_code
+                                                         AND P.c2_code = T.c2_code)
+                                            THEN null
+                                            ELSE c3_code 
+                                            END AS c3_code
+                  FROM covers_all P)
+                  MINUS
+                 (SELECT *
+                  FROM not_legit_three)),
+     costs AS (SELECT c1_code, c2_code, c3_code, SUM(retail_price) AS total_cost
+               FROM combine, course
+               WHERE course.c_code = combine.c1_code
+               OR course.c_code = combine.c2_code
+               OR course.c_code = combine.c3_code
+               GROUP BY c1_code, c2_code, c3_code)
+                 
+SELECT *
+FROM costs
+ORDER BY total_cost ASC;
 
 --13--job categories that they're qualified for
 WITH required_skills AS (SELECT ks_code, cate_code
@@ -745,8 +698,4 @@ WITH leaf_cate AS (SELECT cate_code
 SELECT c_code, num_qual
 FROM qualifies, max_qualifies
 WHERE max_num = num_qual;
-                       
-                       
-                       
-                       
                        

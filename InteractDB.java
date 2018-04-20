@@ -5,6 +5,7 @@ public class InteractDB{
 
 	static Scanner input = new Scanner(System.in);
 	static int answer;
+	static private String[] queries = new String[27];
 
 
 	
@@ -12,6 +13,7 @@ public class InteractDB{
 
 
 		Boolean cont = true;
+		setQueries();
 
 		while(cont){
 
@@ -35,7 +37,8 @@ public class InteractDB{
 				case 3:
 					break;//add to later
 				case 4:
-					runQuery();
+					System.out.println();
+					runQuery(queries[askQuery()], true);
 					break;
 				case 5:
 					cont = false;
@@ -105,49 +108,54 @@ public class InteractDB{
 			}
 		}
 
-		return response;
+		System.out.println();
+
+		return response - 1;
 	}
 
-	public static Boolean runQuery(){
+	public static Boolean runQuery(String runThis, Boolean isQuery){
 
-
+/*
 		String q = "SELECT DISTINCT per_name\n" +
 					"FROM person, works, position, company\n" +
 					"WHERE person.per_id = works.per_id AND position.comp_id = company.comp_id\n"+
 					"AND position.pos_code = works.pos_code\n"+
 					"AND comp_name = 'Flashdog'";
 
-
+*/
 		try{
-            // step 1 load the driver class
+            
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            // step 2 create the connection object
+            
             Connection con=DriverManager.getConnection(
                 "jdbc:oracle:thin:@dbsvcs.cs.uno.edu:1521:orcl", "rnmatthe", "McmfNXV9");
 
-            // step 3 create the statement object
+            
             Statement stmt = con.createStatement();
-            // step 4 execute query
-            ResultSet rs = stmt.executeQuery(q);
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int cols = rsmd.getColumnCount();
-            for (int i = 1; i <= cols; i++) {
-                System.out.print(String.format("%-30s", rsmd.getColumnName(i)));
-            }
-            System.out.println();
-            while (rs.next()) {
-                for (int i = 1; i <= cols; i++) {
-                    String colValue = rs.getString(i);
-                    System.out.print(String.format("%-30s", colValue));
-                }
-                System.out.println();
-    
-            }
 
-            //String insert = "insert into has_skill(per_id, ks_code) values(20, 301)";
-            //stmt.executeUpdate(insert);
+            if(isQuery){
+            
+	            ResultSet rs = stmt.executeQuery(runThis);
+	            ResultSetMetaData rsmd = rs.getMetaData();
+	            int cols = rsmd.getColumnCount();
+	            for (int i = 1; i <= cols; i++) {
+	                System.out.print(String.format("%-30s", rsmd.getColumnName(i)));
+	            }
+	            System.out.println();
+	            while (rs.next()) {
+	                for (int i = 1; i <= cols; i++) {
+	                    String colValue = rs.getString(i);
+	                    System.out.print(String.format("%-30s", colValue));
+	                }
+	                System.out.println();
+	    
+	            }
+
+        	} else {
+        		stmt.executeUpdate(runThis);
+        	}
            
-            // step 5 close the connection object
+            
             con.close();
         } catch (Exception e) {
             System.out.println(e);
@@ -158,7 +166,7 @@ public class InteractDB{
         return true;
 	}
 
-	public static Boolean insert(int table){
+	public static void insert(int table){
 		String insertStatement = "";
 		switch(table){
 			case 1://person
@@ -190,7 +198,9 @@ public class InteractDB{
 				String gender = input.next();
 
 				insertStatement = "INSERT INTO person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) VALUES (";
-				insertStatement += per_id + ", " + per_name + ", " + street_name + ", " + street_num + ", ";
+				insertStatement += per_id + ", '" + per_name + "', '" + street_name + "', " + street_num + ", '" + city + "', '" + state + "', " + zip_code + ", '" + email + "', '" + gender + "')";
+
+				runQuery(insertStatement, false);
 				break;
 			case 2://position
 				System.out.print("\nEnter per_id to be deleted: ");
@@ -202,12 +212,27 @@ public class InteractDB{
 				break;
 		}
 
-		System.out.println(insertStatement);
-		return false;
+		//System.out.println(insertStatement);
 	}
 
 	public static Boolean delete(int table){
 		System.out.println("delete table num: " + table);
 		return false;
+	}
+
+	public static void setQueries(){
+		queries[0] = "SELECT DISTINCT per_name\n" +
+					"FROM person, works, position, company\n" +
+					"WHERE person.per_id = works.per_id AND position.comp_id = company.comp_id\n"+
+					"AND position.pos_code = works.pos_code\n"+
+					"AND comp_name = 'Flashdog'";
+		queries[1] = "WITH salaries AS (SELECT per_id, pos_code, pay_rate\n"+
+                  	  "FROM works NATURAL JOIN position\n"+
+                      "WHERE end_date > SYSDATE\n"+
+                  	  "AND pay_type = 'salary')\n"+
+					  "SELECT per_name, pay_rate\n"+
+					  "FROM person NATURAL JOIN salaries\n"+
+					  "ORDER BY pay_rate DESC";
+		queries[2] = "";
 	}
 }
