@@ -15,7 +15,6 @@ drop table job_category;
 drop table section;
 drop table teaches;
 drop table course;
-drop table falls_under;
 drop table knowledge_skill;
 drop table nwcet;
 drop table naics;
@@ -127,28 +126,22 @@ create table section(
     foreign key (c_code) references course
 );
 
+create table nwcet(
+    cc_code varchar(4),
+    title varchar(50),
+    parent_cc_code varchar(4),
+    
+    primary key (cc_code)
+);
+
 create table knowledge_skill(
     ks_code number,
     title varchar(10),
     description varchar(40),
     skill_level varchar(8),
-    
-    primary key (ks_code)
-);
-
-create table nwcet(
-    cc_code varchar(4),
-    title varchar(50),
-    
-    primary key (cc_code)
-);
-
-create table falls_under(
-    ks_code number,
     cc_code varchar(4),
     
-    primary key (ks_code, cc_code),
-    foreign key (ks_code) references knowledge_skill,
+    primary key (ks_code),
     foreign key (cc_code) references nwcet
 );
 
@@ -265,13 +258,13 @@ insert into company(comp_id, comp_name, comp_city, comp_street, comp_street_num,
 insert into company(comp_id, comp_name, comp_city, comp_street, comp_street_num, comp_state, comp_zip_code, website, ind_code) values (5, 'Flipopia', 'Rochester', 'Northport', 73, 'New York', 14646, 'www.flipopia.com', 541519);
 
 --NWCET
-insert into nwcet(cc_code, title) values ('DDA', 'Database Development and Administration');
-insert into nwcet(cc_code, title) values ('DM', 'Digital Media');
-insert into nwcet(cc_code, title) values ('ESAI', 'Enterprise Systems Analysis and Integration');
-insert into nwcet(cc_code, title) values ('NDA', 'Network Design and Administration');
-insert into nwcet(cc_code, title) values ('PSE', 'Programming/Software Engineering');
-insert into nwcet(cc_code, title) values ('TS', 'Technical Support');
-insert into nwcet(cc_code, title) values ('WDA', 'Web Development and Administration');
+insert into nwcet(cc_code, title, parent_cc_code) values ('DDA', 'Database Development and Administration', null);
+insert into nwcet(cc_code, title, parent_cc_code) values ('DM', 'Digital Media', null);
+insert into nwcet(cc_code, title, parent_cc_code) values ('ESAI', 'Enterprise Systems Analysis and Integration', null);
+insert into nwcet(cc_code, title, parent_cc_code) values ('NDA', 'Network Design and Administration', null);
+insert into nwcet(cc_code, title, parent_cc_code) values ('PSE', 'Programming/Software Engineering', null);
+insert into nwcet(cc_code, title, parent_cc_code) values ('TS', 'Technical Support', null);
+insert into nwcet(cc_code, title, parent_cc_code) values ('WDA', 'Web Development and Administration', null);
 
 --position
 insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values ( 23, 'full-time', 100000, 'salary', 1, 78);
@@ -295,16 +288,10 @@ insert into works(per_id, pos_code, start_date, end_date) values (5, 27, to_date
 insert into works(per_id, pos_code, start_date, end_date) values (8, 26, to_date ('03 MAY 2001'), to_date ('07 MAY 2021'));
 
 --knowledge skill
-insert into knowledge_skill(ks_code, title, description, skill_level) values (346, 'MySQL', 'query language', 'medium');
-insert into knowledge_skill(ks_code, title, description, skill_level) values (478, 'Java', 'object oriented programming language', 'beginner');
-insert into knowledge_skill(ks_code, title, description, skill_level) values (301, 'FireAlpaca', 'digital art program', 'beginner');
-insert into knowledge_skill(ks_code, title, description, skill_level) values (451, 'JavaScript', 'scripting language', 'medium');
-
---falls under
-insert into falls_under(ks_code, cc_code) values ( 346, 'DDA');
-insert into falls_under(ks_code, cc_code) values ( 478, 'PSE');
-insert into falls_under(ks_code, cc_code) values ( 301, 'DM');
-insert into falls_under(ks_code, cc_code) values ( 451, 'WDA');
+insert into knowledge_skill(ks_code, title, description, skill_level, cc_code) values (346, 'MySQL', 'query language', 'medium','DDA');
+insert into knowledge_skill(ks_code, title, description, skill_level, cc_code) values (478, 'Java', 'object oriented programming language', 'beginner', 'PSE');
+insert into knowledge_skill(ks_code, title, description, skill_level, cc_code) values (301, 'FireAlpaca', 'digital art program', 'beginner', 'DM');
+insert into knowledge_skill(ks_code, title, description, skill_level, cc_code) values (451, 'JavaScript', 'scripting language', 'medium', 'WDA');
 
 --has_skill
 insert into has_skill(per_id, ks_code) values (1, 346);
@@ -332,7 +319,6 @@ insert into requires(pos_code, ks_code, prefer) values (24, 301, null);
 insert into requires(pos_code, ks_code, prefer) values (25, 346, null);
 insert into requires(pos_code, ks_code, prefer) values (25, 301, null);
 insert into requires(pos_code, ks_code, prefer) values (27, 301, null);
-
 insert into requires(pos_code, ks_code, prefer) values (29, 301, null);
 insert into requires(pos_code, ks_code, prefer) values (28, 451, null);
 
