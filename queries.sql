@@ -238,6 +238,52 @@ SELECT c1_code, c2_code, CASE
 FROM get_costs
 ORDER BY price ASC;
 
+--12--SIMPLIFIED
+WITH needed_skills AS ((SELECT ks_code
+                        FROM requires
+                        WHERE pos_code = 26)
+                        MINUS
+                       (SELECT ks_code
+                        FROM has_skill
+                        WHERE per_id = 3)),
+     relevent_courses AS (SELECT DISTINCT (c_code), ks_code
+                          FROM teaches NATURAL JOIN needed_skills),
+     c1 AS (SELECT *
+            FROM relevent_courses),
+     c2 AS (SELECT *
+            FROM relevent_courses),
+     c3 AS (SELECT *
+            FROM relevent_courses),
+     all_poss AS (SELECT DISTINCT c1.c_code AS c1_code, c2.c_code AS c2_code, c3.c_code AS c3_code
+                  FROM c1, c2, c3
+                  WHERE c1.c_code < c2.c_code
+                  AND c2.c_code < c3.c_code),
+     covers_all AS (SELECT *
+                    FROM all_poss P
+                    WHERE NOT EXISTS ((SELECT ks_code
+                                       FROM needed_skills)
+                                       MINUS
+                                      (SELECT ks_code
+                                       FROM teaches T
+                                       WHERE T.c_code = P.c1_code
+                                       OR T.c_code = P.c2_code
+                                       OR T.c_code = P.c3_code)
+                                     )
+                   ),
+     sets_of_two AS (SELECT c1.c_code AS c1_code, c2.c_code AS c2_code
+                     FROM c1, c2
+                     WHERE c1.c_code < c2.c_code),
+     legit_two AS (SELECT c1_code, c2_code
+                   FROM sets_of_two P
+                   WHERE NOT EXISTS ((SELECT ks_code
+                                      FROM needed_skills)
+                                      MINUS
+                                     (SELECT ks_code
+                                      FROM teaches T
+                                      WHERE T.c_code = P.c1_code
+                                      OR T.c_code = P.c2_code)))
+select distinct *
+from legit_two;
 
 --13--job categories that they're qualified for
 WITH required_skills AS (SELECT ks_code, cate_code
@@ -464,7 +510,7 @@ WHERE totals.total_spent = max_spent.the_max;
 
 
 --25--
---number of people whose earning increased ***********************************************************************************
+--number of people whose earning increased 
 WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
                                                       WHEN pay_type = 'salary'
                                                       THEN pay_rate
@@ -521,6 +567,66 @@ FROM difference
 WHERE pay_change < 0;
 
 --ratio of increased to decreased
+WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
+                                                      WHEN pay_type = 'salary'
+                                                      THEN pay_rate
+                                                      ELSE pay_rate * 1920
+                                                      END AS pay
+                   FROM works NATURAL JOIN position
+                   WHERE end_date < SYSDATE),
+    most_recent AS (SELECT per_id, pay, end_date
+                    FROM past_jobs P
+                    WHERE P.end_date = (SELECT MAX(end_date)
+                                        FROM past_jobs T
+                                        WHERE T.per_id = P.per_id)
+                    ),
+    current_pay AS (SELECT per_id, CASE
+                                   WHEN pay_type = 'salary'
+                                   THEN pay_rate
+                                   ELSE pay_rate * 1920
+                                   END AS pay
+                    FROM works NATURAL JOIN position
+                    WHERE end_date > SYSDATE),
+    difference AS (SELECT DISTINCT current_pay.per_id, current_pay.pay - most_recent.pay AS pay_change
+                   FROM current_pay, most_recent
+                   WHERE current_pay.per_id = most_recent.per_id),
+    increased AS (SELECT COUNT (per_id) AS num_inc
+                  FROM difference
+                  WHERE pay_change > 0),
+    decreased AS (SELECT COUNT (per_id) AS num_dec
+                  FROM difference
+                  WHERE pay_change < 0)
+SELECT *
+FROM increased, decreased;
+
+--average earning change rate for people in a particular sector
+WITH past_jobs AS (SELECT per_id, pos_code, end_date, CASE
+                                                      WHEN pay_type = 'salary'
+                                                      THEN pay_rate
+                                                      ELSE pay_rate * 1920
+                                                      END AS pay
+                   FROM works NATURAL JOIN position NATURAL JOIN company
+                   WHERE end_date < SYSDATE
+                   AND ind_code = 511210),
+    most_recent AS (SELECT per_id, pay, end_date
+                    FROM past_jobs P
+                    WHERE P.end_date = (SELECT MAX(end_date)
+                                        FROM past_jobs T
+                                        WHERE T.per_id = P.per_id)
+                    ),
+    current_pay AS (SELECT per_id, CASE
+                                   WHEN pay_type = 'salary'
+                                   THEN pay_rate
+                                   ELSE pay_rate * 1920
+                                   END AS pay
+                    FROM works NATURAL JOIN position NATURAL JOIN company
+                    WHERE end_date > SYSDATE
+                    AND ind_code = 511210),
+    difference AS (SELECT DISTINCT current_pay.per_id, current_pay.pay - most_recent.pay AS pay_change
+                   FROM current_pay, most_recent
+                   WHERE current_pay.per_id = most_recent.per_id)
+SELECT AVG(pay_change)
+FROM difference;
 
 --26--max vacancies due to unqualfied workers
 WITH leaf_cate AS (SELECT cate_code
@@ -535,6 +641,112 @@ WITH leaf_cate AS (SELECT cate_code
                                    WHERE P.pos_code = W.pos_code
                                    AND W.end_date > SYSDATE)),
      vacancies AS (SELECT cate_code, COUNT(pos_code) AS num_vac
-                   FROM leaf_cate NATURAL JOIN emp_poss
+                   FROM leaf_cate NATURAL JOIN emp_pos
                    GROUP BY cate_code),
---come back to later
+     unemployed AS (SELECT per_id
+                    FROM person P
+                    WHERE NOT EXISTS (SELECT pos_code
+                                      FROM works W
+                                      WHERE w.per_id = P.per_id
+                                      AND W.end_date > SYSDATE)),
+     setup AS (SELECT cate_code, pos_code, per_id
+               FROM unemployed, emp_pos),
+     qualified_people AS (SELECT cate_code, per_id
+                          FROM setup T
+                          WHERE NOT EXISTS ((SELECT ks_code
+                                             FROM requires P
+                                             WHERE P.pos_code = T.pos_code
+                                             MINUS
+                                            (SELECT ks_code
+                                             FROM has_skill H
+                                             WHERE H.per_id = T.per_id)))),
+     
+     total_qual AS (SELECT cate_code, COUNT(per_id) AS num_qual
+                    FROM qualified_people
+                    GROUP BY cate_code),
+     diff AS (SELECT cate_code, num_vac - num_qual AS real_num
+              FROM total_qual NATURAL JOIN vacancies),
+     max_vac AS (SELECT MAX(real_num) AS max_num
+                 FROM diff)
+SELECT cate_code, real_num
+FROM diff, max_vac
+WHERE real_num = max_num;
+
+--27--course that would make the most jobless people qualified for that category
+WITH leaf_cate AS (SELECT cate_code
+                   FROM job_category T
+                   WHERE NOT EXISTS (SELECT parent_cate
+                                     FROM job_category P
+                                     WHERE P.parent_cate = T.cate_code)),
+     emp_pos AS (SELECT pos_code, cate_code
+                 FROM position P
+                 WHERE NOT EXISTS (SELECT pos_code
+                                   FROM works W
+                                   WHERE P.pos_code = W.pos_code
+                                   AND W.end_date > SYSDATE)),
+     vacancies AS (SELECT cate_code, COUNT(pos_code) AS num_vac
+                   FROM leaf_cate NATURAL JOIN emp_pos
+                   GROUP BY cate_code),
+     unemployed AS (SELECT per_id
+                    FROM person P
+                    WHERE NOT EXISTS (SELECT pos_code
+                                      FROM works W
+                                      WHERE w.per_id = P.per_id
+                                      AND W.end_date > SYSDATE)),
+     setup AS (SELECT cate_code, pos_code, per_id
+               FROM unemployed, emp_pos),
+     qualified_people AS (SELECT cate_code, per_id, pos_code
+                          FROM setup T
+                          WHERE NOT EXISTS ((SELECT ks_code
+                                             FROM requires P
+                                             WHERE P.pos_code = T.pos_code
+                                             MINUS
+                                            (SELECT ks_code
+                                             FROM has_skill H
+                                             WHERE H.per_id = T.per_id)))),
+     
+     total_qual AS (SELECT cate_code, COUNT(per_id) AS num_qual
+                    FROM qualified_people
+                    GROUP BY cate_code),
+     diff AS (SELECT cate_code, num_vac - num_qual AS real_num
+              FROM total_qual NATURAL JOIN vacancies),
+     max_vac AS (SELECT MAX(real_num) AS max_num
+                 FROM diff),
+     relevent_cate AS (SELECT cate_code
+                       FROM diff, max_vac
+                       WHERE real_num = max_num),
+     unqualified_people AS ((SELECT per_id
+                             FROM unemployed)
+                             MINUS
+                            (SELECT per_id
+                             FROM qualified_people NATURAL JOIN relevent_cate)),
+     relevent_pos AS (SELECT pos_code, ks_code
+                      FROM position NATURAL JOIN requires NATURAL JOIN relevent_cate),
+     setup_courses AS (SELECT c_code, per_id
+                       FROM unqualified_people, course),
+     qualifies AS (SELECT c_code, COUNT(per_id) AS num_qual
+                   FROM setup_courses M
+                   WHERE EXISTS (SELECT pos_code
+                                 FROM relevent_pos P
+                                 WHERE NOT EXISTS (((SELECT ks_code
+                                                    FROM relevent_pos T
+                                                    WHERE P.pos_code = T.pos_code)
+                                                    MINUS
+                                                   (SELECT ks_code
+                                                    FROM has_skill H
+                                                    WHERE H.per_id = M.per_id))
+                                                    MINUS
+                                                   (SELECT ks_code
+                                                    FROM teaches E
+                                                    WHERE E.c_code = M.c_code)))
+                  GROUP BY c_code),
+     max_qualifies AS (SELECT MAX(num_qual) AS max_num
+                       FROM qualifies)
+SELECT c_code, num_qual
+FROM qualifies, max_qualifies
+WHERE max_num = num_qual;
+                       
+                       
+                       
+                       
+                       

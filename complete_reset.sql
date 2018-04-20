@@ -279,6 +279,9 @@ insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code)
 insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values ( 25, 'full-time', 80000, 'salary', 2, 78);
 insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values ( 26, 'full-time', 20, 'wage', 2, 78);
 insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values ( 27, 'full-time', 15, 'wage', 1, 78);
+insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values ( 28, 'full-time', 15, 'wage', 1, 78);
+insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values ( 29, 'full-time', 15, 'wage', 1, 78);
+
 
 --works
 insert into works(per_id, pos_code, start_date, end_date) values (1, 23, to_date ('02 MAY 1997'), to_date ('03 MAY 2002'));
@@ -314,6 +317,7 @@ insert into has_skill(per_id, ks_code) values (6, 346);
 insert into has_skill(per_id, ks_code) values (7, 301);
 insert into has_skill(per_id, ks_code) values (8, 346);
 insert into has_skill(per_id, ks_code) values (8, 301);
+insert into has_skill(per_id, ks_code) values (10, 301);
 
 --requires
 insert into requires(pos_code, ks_code, prefer) values (23, 346, null);
@@ -327,6 +331,10 @@ insert into requires(pos_code, ks_code, prefer) values (24, 346, null);
 insert into requires(pos_code, ks_code, prefer) values (24, 301, null);
 insert into requires(pos_code, ks_code, prefer) values (25, 346, null);
 insert into requires(pos_code, ks_code, prefer) values (25, 301, null);
+insert into requires(pos_code, ks_code, prefer) values (27, 301, null);
+
+insert into requires(pos_code, ks_code, prefer) values (29, 301, null);
+insert into requires(pos_code, ks_code, prefer) values (28, 451, null);
 
 
 --course
