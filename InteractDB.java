@@ -215,9 +215,28 @@ public class InteractDB{
 		//System.out.println(insertStatement);
 	}
 
-	public static Boolean delete(int table){
-		System.out.println("delete table num: " + table);
-		return false;
+	public static void delete(int table){
+		//System.out.println("delete table num: " + table);
+
+		switch(table){
+			case 1://person
+				System.out.print("\nEnter per_id to be deleted: ");
+				int per_id = input.nextInt();
+
+				String deleteStatement = "DELETE FROM person WHERE per_id = " + per_id;
+
+				runQuery(deleteStatement, false);
+				
+				break;
+			case 2://position
+				System.out.print("\nEnter  to be deleted: ");
+			case 3://job_category
+
+			case 4://course
+
+			default:
+				break;
+		}
 	}
 
 	public static void setQueries(){

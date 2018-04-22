@@ -239,26 +239,24 @@ FROM costs
 ORDER BY total_cost ASC;
 
 --13--job categories that they're qualified for
-WITH required_skills AS (SELECT ks_code, cate_code
-                         FROM core_skill NATURAL JOIN falls_under),
-     qualified_for AS (SELECT DISTINCT cate_code
-                       FROM required_skills P
-                       WHERE NOT EXISTS ((SELECT ks_code
-                                          FROM required_skills T
-                                          WHERE T.cate_code = P.cate_code)
-                                          MINUS
-                                         (SELECT ks_code
-                                          FROM has_skill
-                                          WHERE per_id = 1)))
-SELECT cate_code, cate_title
-FROM qualified_for NATURAL JOIN job_category;
+WITH person_cc AS (SELECT cc_code
+                   FROM has_skill NATURAL JOIN knowledge_skill
+                   WHERE has_skill.per_id = 1) 
+SELECT JC.cate_code, JC.cate_title
+FROM job_category JC
+WHERE NOT EXISTS ((SELECT cc_code
+                   FROM core_skill CS
+                   WHERE JC.cate_code = CS.cate_code)
+                   MINUS
+                  (SELECT cc_code
+                   FROM person_cc)); 
 
 --14--position with highest payrate according to their skills given pid 
 WITH per_skills AS (SELECT ks_code
                     FROM has_skill
                     WHERE per_id = 1),
      qualified_for AS (SELECT DISTINCT pos_code
-                       FROM requires R
+                       FROM position R
                        WHERE NOT EXISTS ((SELECT ks_code
                                           FROM requires P
                                           WHERE P.pos_code = R.pos_code)
@@ -301,25 +299,16 @@ FROM num_has, num_skills_req
 WHERE num_has.num = num_skills_req.num - 1;
 
 --17------how many people missed each skill-------
-WITH needed_skills AS (SELECT ks_code
+WITH needed_skills AS (SELECT ks_code 
                        FROM requires
                        WHERE pos_code = 23),
-     num_skills_req AS (SELECT COUNT(ks_code) AS num
-                        FROM needed_skills),
-     num_has AS (SELECT per_id, COUNT(ks_code) AS num
-                 FROM has_skill NATURAL JOIN needed_skills
-                 GROUP BY per_id),
-     ppl_list AS (SELECT per_id
-                  FROM num_has, num_skills_req
-                  WHERE num_has.num = num_skills_req.num - 1),
-     combine AS (SELECT * 
-                 FROM needed_skills, ppl_list)
-SELECT ks_code, COUNT(per_id)
-FROM combine P
-WHERE NOT EXISTS (SELECT *
-                  FROM has_skill T
-                  WHERE T.per_id = P.per_id
-                  AND T.ks_code = P.ks_code)
+     missing_skills AS ((SELECT per_id, ks_code
+                         FROM person, needed_skills)
+                        MINUS
+                         (SELECT per_id, ks_code
+                          FROM has_skill))
+SELECT DISTINCT ks_code, COUNT(per_id)                      
+FROM missing_skills
 GROUP BY ks_code;
 
 --18--ppl who miss the least number and report the least number
