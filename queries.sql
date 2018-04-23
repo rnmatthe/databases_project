@@ -55,11 +55,9 @@ WITH position_skills as (SELECT requires.pos_code, knowledge_skill.title, knowle
 SELECT pos_code, title required_skill, ks_code
 FROM position_skills;
 
-WITH category_skills as (SELECT core_skill.cate_code, knowledge_skill.title, knowledge_skill.ks_code
-                         FROM core_skill, falls_under, knowledge_skill
-                         WHERE knowledge_skill.ks_code = falls_under.ks_code
-                         AND core_skill.cc_code = falls_under.cc_code
-                         AND core_skill.cate_code = 78)
+WITH category_skills as (SELECT cate_code, knowledge_skill.title, ks_code
+                         FROM core_skill NATURAL JOIN knowledge_skill
+                         WHERE cate_code = 78)
 SELECT cate_code, title required_skill, ks_code
 FROM category_skills;
 
@@ -98,7 +96,7 @@ WITH skills_needed AS ((SELECT ks_code
                        (SELECT ks_code
                         FROM has_skill
                         WHERE per_id = 2)),
-    relevent_sections AS (SELECT c_code, title, sec_no, complete_date
+    relevent_sections AS (SELECT c_code, sec_no, complete_date
                          FROM section NATURAL JOIN (SELECT c_code
                                                     FROM course P
                                                     WHERE NOT EXISTS ((SELECT *
@@ -112,7 +110,7 @@ WITH skills_needed AS ((SELECT ks_code
                          ),
     closest_date AS (SELECT MIN(complete_date) AS min_date
                      FROM relevent_sections)
-SELECT DISTINCT c_code, title, sec_no, complete_date
+SELECT DISTINCT c_code, sec_no, complete_date
 FROM relevent_sections, closest_date
 WHERE complete_date = min_date;
 
@@ -124,23 +122,19 @@ WITH skills_needed AS ((SELECT ks_code
                        (SELECT has_skill.ks_code
                         FROM has_skill
                         WHERE per_id = 2)),
-    relevent_sections AS (SELECT c_code, title, sec_no, complete_date, retail_price
-                          FROM section NATURAL JOIN (SELECT c_code, retial_price
-                                                     FROM course P
-                                                     WHERE NOT EXISTS ((SELECT *
-                                                                        FROM skills_needed)
-                                                                        MINUS
-                                                                       (SELECT ks_code
-                                                                        FROM teaches T
-                                                                        WHERE T.c_code = P.c_code))
-                                                     )
-                          WHERE section.complete_date > SYSDATE
-                          ORDER BY course.retail_price
-                          ),
+    relevent_course AS (SELECT c_code, retail_price, title
+                        FROM course P
+                        WHERE NOT EXISTS ((SELECT *
+                                          FROM skills_needed)
+                                          MINUS
+                                          (SELECT ks_code
+                                           FROM teaches T
+                                           WHERE T.c_code = P.c_code))),
     cheapest AS (SELECT MIN(retail_price) AS retail_price
-                 FROM relevent_sections)
-SELECT DISTINCT c_code, title, sec_no, complete_date, retail_price
-FROM relevent_sections NATURAL JOIN cheapest;                      
+                 FROM relevent_course)
+SELECT *
+FROM relevent_course NATURAL JOIN section NATURAL JOIN cheapest
+WHERE complete_date > SYSDATE;
 
 --12--SIMPLIFIED
 WITH needed_skills AS ((SELECT ks_code
