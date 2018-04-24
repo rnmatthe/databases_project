@@ -9,6 +9,7 @@ public class InteractDB{
       static private final String delete = "delete";
       static private final String insert = "insert";
       static private final String query = "query";
+      static private final String changeStatus = "change status";
 
 
 	
@@ -40,6 +41,7 @@ public class InteractDB{
                               runQuery(null, askTables(), delete);
 					break;
 				case 3:
+                              runQuery(null, -1, changeStatus);
 					break;//add to later
 				case 4:
                               int queryToRun = askQuery();
@@ -240,7 +242,34 @@ public class InteractDB{
                               pStatement.executeUpdate();
                         }
                   } else if (operation == delete){
-                        
+                        if(tableNum == 1){//person
+                              PreparedStatement pStatement = con.prepareStatement("delete from person where per_id = ?");
+                              System.out.println("Enter per_id: ");
+                              pStatement.setInt(1, input.nextInt());
+                              pStatement.executeUpdate();
+                        } else if(tableNum == 2){//position
+                              PreparedStatement pStatement = con.prepareStatement("delete from position where pos_code = ?");
+                              System.out.println("Enter pos_code: ");
+                              pStatement.setInt(1, input.nextInt());
+                              pStatement.executeUpdate();
+                        } else if(tableNum == 3){//job_category
+                              PreparedStatement pStatement = con.prepareStatement("delete from job_category where cate_code = ?");
+                              System.out.println("Enter cate_code: ");
+                              pStatement.setInt(1, input.nextInt());
+                              pStatement.executeUpdate();
+                        } else {//course
+                              PreparedStatement pStatement = con.prepareStatement("delete from course where c_code = ?");
+                              System.out.println("Enter c_code: ");
+                              pStatement.setInt(1, input.nextInt());
+                              pStatement.executeUpdate();
+                        }
+                  } else if (operation == changeStatus){
+                        PreparedStatement pStatement = con.prepareStatement("update course set status = ? where c_code = ?");
+                        System.out.println("Enter c_code");
+                        pStatement.setInt(2, input.nextInt());
+                        System.out.println("Enter updated status (expired or active): ");
+                        pStatement.setString(1, input.next());
+                        pStatement.executeUpdate();
                   }
         	}
            
@@ -253,79 +282,6 @@ public class InteractDB{
         }
         System.out.println();
         return true;
-	}
-
-	public static void insert(int table){
-		String insertStatement = "";
-		switch(table){
-			case 1://person
-				System.out.print("\nEnter per_id: ");
-				int per_id = input.nextInt();
-
-				System.out.print("Enter per_name: ");
-				String per_name = input.next();
-
-				System.out.print("Enter street_name: ");
-				String street_name = input.next();
-
-				System.out.print("Enter street_num: ");
-				int street_num = input.nextInt(); 
-
-				System.out.print("Enter city: ");
-				String city = input.next();
-
-				System.out.print("Enter state: ");
-				String state = input.next();
-
-				System.out.print("Enter zip_code: ");
-				int zip_code = input.nextInt();
-
-				System.out.print("Enter email: ");
-				String email = input.next();
-
-				System.out.print("Enter gender (male or female): ");
-				String gender = input.next();
-
-				insertStatement = "INSERT INTO person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) VALUES (";
-				insertStatement += per_id + ", '" + per_name + "', '" + street_name + "', " + street_num + ", '" + city + "', '" + state + "', " + zip_code + ", '" + email + "', '" + gender + "')";
-
-				//runQuery(insertStatement, false);
-				break;
-			case 2://position
-				System.out.print("\nEnter per_id to be deleted: ");
-			case 3://job_category
-
-			case 4://course
-
-			default:
-				break;
-		}
-
-		//System.out.println(insertStatement);
-	}
-
-	public static void delete(int table){
-		//System.out.println("delete table num: " + table);
-
-		switch(table){
-			case 1://person
-				System.out.print("\nEnter per_id to be deleted: ");
-				int per_id = input.nextInt();
-
-				String deleteStatement = "DELETE FROM person WHERE per_id = " + per_id;
-
-				//runQuery(deleteStatement, false);
-				
-				break;
-			case 2://position
-				System.out.print("\nEnter  to be deleted: ");
-			case 3://job_category
-
-			case 4://course
-
-			default:
-				break;
-		}
 	}
 
 	public static void setQueries(){
