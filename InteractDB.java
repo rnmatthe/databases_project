@@ -33,16 +33,14 @@ public class InteractDB{
 
 			switch(answer){
 				case 1:
-					//insert(askTables());
                               runQuery(null, askTables(), insert);
 					break;
 				case 2:
-					//delete(askTables());
                               runQuery(null, askTables(), delete);
 					break;
 				case 3:
                               runQuery(null, -1, changeStatus);
-					break;//add to later
+					break;
 				case 4:
                               int queryToRun = askQuery();
                             
@@ -148,130 +146,130 @@ public class InteractDB{
 
 		try{
             
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-            
-            Connection con=DriverManager.getConnection(
-                "jdbc:oracle:thin:@dbsvcs.cs.uno.edu:1521:orcl", "rnmatthe", "McmfNXV9");
-
-            
-            Statement stmt = con.createStatement();
-
-            if(operation == query){
-
-	            ResultSet rs = stmt.executeQuery(runThis);
-	            ResultSetMetaData rsmd = rs.getMetaData();
-	            int cols = rsmd.getColumnCount();
-	            for (int i = 1; i <= cols; i++) {
-	                System.out.print(String.format("%-30s", rsmd.getColumnName(i)));
-	            }
-	            System.out.println();
-	            while (rs.next()) {
-	                for (int i = 1; i <= cols; i++) {
-	                    String colValue = rs.getString(i);
-	                    System.out.print(String.format("%-30s", colValue));
-	                }
-	                System.out.println();
-	    
-	            }
-        	} else {
+                  Class.forName("oracle.jdbc.driver.OracleDriver");
                   
-                  if(operation == insert){
-                        if(tableNum == 1){//person
-                              PreparedStatement pStatement = con.prepareStatement("INSERT INTO person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) VALUES (?,?,?,?,?,?,?,?,?)");
-                              System.out.println("Enter per_id: ");
-                              pStatement.setInt(1, input.nextInt());
-                              System.out.println("Enter per_name: ");
-                              pStatement.setString(2, input.next());
-                              System.out.println("Enter street_name: ");
-                              pStatement.setString(3, input.next());
-                              System.out.println("Enter street_num: ");
-                              pStatement.setInt(4, input.nextInt());
-                              System.out.println("Enter city: ");
-                              pStatement.setString(5, input.next());
-                              System.out.println("Enter state: ");
-                              pStatement.setString(6, input.next());
-                              System.out.println("Enter zip_code: ");
-                              pStatement.setInt(7, input.nextInt());
-                              System.out.println("Enter email: ");
-                              pStatement.setString(8, input.next());
-                              System.out.println("Enter gender: ");
-                              pStatement.setString(9, input.next());
-                              pStatement.executeUpdate();
-                        } else if(tableNum == 2){//position
-                              PreparedStatement pStatement = con.prepareStatement("insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values (?,?,?,?,?,?)");
-                              System.out.println("Enter pos_code: ");
-                              pStatement.setInt(1, input.nextInt());
-                              System.out.println("Enter emp_mode (full-time or part-time): ");
-                              pStatement.setString(2, input.next());
-                              System.out.println("Enter pay_rate: ");
-                              pStatement.setInt(3, input.nextInt());
-                              System.out.println("Enter pay_type (salary or hourly): ");
-                              pStatement.setString(4, input.next());
-                              System.out.println("Enter comp_id: ");
-                              pStatement.setInt(5, input.nextInt());
-                              System.out.println("Enter cate_code: ");
-                              pStatement.setInt(6, input.nextInt());
-                              pStatement.executeUpdate();
-                        } else if(tableNum == 3){//job_category
-                              PreparedStatement pStatement = con.prepareStatement("insert into job_category(cate_code, cate_title, cate_description, pay_range_high, pay_range_low, parent_cate) values (?,?,?,?,?,?)");
-                              System.out.println("Enter cate_code: ");
-                              pStatement.setInt(1, input.nextInt());
-                              System.out.println("Enter cate_title: ");
-                              pStatement.setString(2, input.next());
-                              System.out.println("Enter cate_description: ");
-                              pStatement.setString(3, input.next());
-                              System.out.println("Enter pay_range_high: ");
-                              pStatement.setInt(4, input.nextInt());
-                              System.out.println("Enter pay_range_low: ");
-                              pStatement.setInt(5, input.nextInt());
-                              System.out.println("Enter parent_cate: ");
-                              pStatement.setInt(6, input.nextInt());
-                              pStatement.executeUpdate();
-                        } else {//course
-                              PreparedStatement pStatement = con.prepareStatement("insert into course(c_code, title, description, status, retail_price) values (?,?,?,?,?)");
-                              System.out.println("Enter c_code (expired or active): ");
-                              pStatement.setInt(1, input.nextInt());
-                              System.out.println("Enter title: ");
-                              pStatement.setString(2, input.next());
-                              System.out.println("Enter description: ");
-                              pStatement.setString(3, input.next());
-                              System.out.println("Enter status: ");
-                              pStatement.setString(4, input.next());
-                              System.out.println("Enter retail_price: ");
-                              pStatement.setInt(5, input.nextInt());
+                  Connection con=DriverManager.getConnection(
+                      "jdbc:oracle:thin:@dbsvcs.cs.uno.edu:1521:orcl", "rnmatthe", "McmfNXV9");
+
+                  
+                  Statement stmt = con.createStatement();
+
+                  if(operation == query){
+
+      	            ResultSet rs = stmt.executeQuery(runThis);
+      	            ResultSetMetaData rsmd = rs.getMetaData();
+      	            int cols = rsmd.getColumnCount();
+      	            for (int i = 1; i <= cols; i++) {
+      	                System.out.print(String.format("%-30s", rsmd.getColumnName(i)));
+      	            }
+      	            System.out.println();
+      	            while (rs.next()) {
+      	                for (int i = 1; i <= cols; i++) {
+      	                    String colValue = rs.getString(i);
+      	                    System.out.print(String.format("%-30s", colValue));
+      	                }
+      	                System.out.println();
+      	    
+      	            }
+              	} else {
+                        
+                        if(operation == insert){
+                              if(tableNum == 1){//person
+                                    PreparedStatement pStatement = con.prepareStatement("INSERT INTO person (per_id, per_name, street_name, street_num, city, state, zip_code, email, gender) VALUES (?,?,?,?,?,?,?,?,?)");
+                                    System.out.println("Enter per_id: ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    System.out.println("Enter per_name: ");
+                                    pStatement.setString(2, input.next());
+                                    System.out.println("Enter street_name: ");
+                                    pStatement.setString(3, input.next());
+                                    System.out.println("Enter street_num: ");
+                                    pStatement.setInt(4, input.nextInt());
+                                    System.out.println("Enter city: ");
+                                    pStatement.setString(5, input.next());
+                                    System.out.println("Enter state: ");
+                                    pStatement.setString(6, input.next());
+                                    System.out.println("Enter zip_code: ");
+                                    pStatement.setInt(7, input.nextInt());
+                                    System.out.println("Enter email: ");
+                                    pStatement.setString(8, input.next());
+                                    System.out.println("Enter gender: ");
+                                    pStatement.setString(9, input.next());
+                                    pStatement.executeUpdate();
+                              } else if(tableNum == 2){//position
+                                    PreparedStatement pStatement = con.prepareStatement("insert into position(pos_code, emp_mode, pay_rate, pay_type, comp_id, cate_code) values (?,?,?,?,?,?)");
+                                    System.out.println("Enter pos_code: ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    System.out.println("Enter emp_mode (full-time or part-time): ");
+                                    pStatement.setString(2, input.next());
+                                    System.out.println("Enter pay_rate: ");
+                                    pStatement.setInt(3, input.nextInt());
+                                    System.out.println("Enter pay_type (salary or hourly): ");
+                                    pStatement.setString(4, input.next());
+                                    System.out.println("Enter comp_id: ");
+                                    pStatement.setInt(5, input.nextInt());
+                                    System.out.println("Enter cate_code: ");
+                                    pStatement.setInt(6, input.nextInt());
+                                    pStatement.executeUpdate();
+                              } else if(tableNum == 3){//job_category
+                                    PreparedStatement pStatement = con.prepareStatement("insert into job_category(cate_code, cate_title, cate_description, pay_range_high, pay_range_low, parent_cate) values (?,?,?,?,?,?)");
+                                    System.out.println("Enter cate_code: ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    System.out.println("Enter cate_title: ");
+                                    pStatement.setString(2, input.next());
+                                    System.out.println("Enter cate_description: ");
+                                    pStatement.setString(3, input.next());
+                                    System.out.println("Enter pay_range_high: ");
+                                    pStatement.setInt(4, input.nextInt());
+                                    System.out.println("Enter pay_range_low: ");
+                                    pStatement.setInt(5, input.nextInt());
+                                    System.out.println("Enter parent_cate: ");
+                                    pStatement.setInt(6, input.nextInt());
+                                    pStatement.executeUpdate();
+                              } else {//course
+                                    PreparedStatement pStatement = con.prepareStatement("insert into course(c_code, title, description, status, retail_price) values (?,?,?,?,?)");
+                                    System.out.println("Enter c_code (expired or active): ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    System.out.println("Enter title: ");
+                                    pStatement.setString(2, input.next());
+                                    System.out.println("Enter description: ");
+                                    pStatement.setString(3, input.next());
+                                    System.out.println("Enter status: ");
+                                    pStatement.setString(4, input.next());
+                                    System.out.println("Enter retail_price: ");
+                                    pStatement.setInt(5, input.nextInt());
+                                    pStatement.executeUpdate();
+                              }
+                        } else if (operation == delete){
+                              if(tableNum == 1){//person
+                                    PreparedStatement pStatement = con.prepareStatement("delete from person where per_id = ?");
+                                    System.out.println("Enter per_id: ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    pStatement.executeUpdate();
+                              } else if(tableNum == 2){//position
+                                    PreparedStatement pStatement = con.prepareStatement("delete from position where pos_code = ?");
+                                    System.out.println("Enter pos_code: ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    pStatement.executeUpdate();
+                              } else if(tableNum == 3){//job_category
+                                    PreparedStatement pStatement = con.prepareStatement("delete from job_category where cate_code = ?");
+                                    System.out.println("Enter cate_code: ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    pStatement.executeUpdate();
+                              } else {//course
+                                    PreparedStatement pStatement = con.prepareStatement("delete from course where c_code = ?");
+                                    System.out.println("Enter c_code: ");
+                                    pStatement.setInt(1, input.nextInt());
+                                    pStatement.executeUpdate();
+                              }
+                        } else if (operation == changeStatus){
+                              PreparedStatement pStatement = con.prepareStatement("update course set status = ? where c_code = ?");
+                              System.out.println("Enter c_code");
+                              pStatement.setInt(2, input.nextInt());
+                              System.out.println("Enter updated status (expired or active): ");
+                              pStatement.setString(1, input.next());
                               pStatement.executeUpdate();
                         }
-                  } else if (operation == delete){
-                        if(tableNum == 1){//person
-                              PreparedStatement pStatement = con.prepareStatement("delete from person where per_id = ?");
-                              System.out.println("Enter per_id: ");
-                              pStatement.setInt(1, input.nextInt());
-                              pStatement.executeUpdate();
-                        } else if(tableNum == 2){//position
-                              PreparedStatement pStatement = con.prepareStatement("delete from position where pos_code = ?");
-                              System.out.println("Enter pos_code: ");
-                              pStatement.setInt(1, input.nextInt());
-                              pStatement.executeUpdate();
-                        } else if(tableNum == 3){//job_category
-                              PreparedStatement pStatement = con.prepareStatement("delete from job_category where cate_code = ?");
-                              System.out.println("Enter cate_code: ");
-                              pStatement.setInt(1, input.nextInt());
-                              pStatement.executeUpdate();
-                        } else {//course
-                              PreparedStatement pStatement = con.prepareStatement("delete from course where c_code = ?");
-                              System.out.println("Enter c_code: ");
-                              pStatement.setInt(1, input.nextInt());
-                              pStatement.executeUpdate();
-                        }
-                  } else if (operation == changeStatus){
-                        PreparedStatement pStatement = con.prepareStatement("update course set status = ? where c_code = ?");
-                        System.out.println("Enter c_code");
-                        pStatement.setInt(2, input.nextInt());
-                        System.out.println("Enter updated status (expired or active): ");
-                        pStatement.setString(1, input.next());
-                        pStatement.executeUpdate();
-                  }
-        	}
+              	}
            
             
             con.close();
@@ -536,17 +534,23 @@ public class InteractDB{
                          "SELECT per_id\n" +
                          "FROM num_has, num_skills_req\n" +
                          "WHERE num_has.num = num_skills_req.num - 1";
-            queries[16]= "WITH needed_skills AS (SELECT ks_code \n" +
-                         "FROM requires\n" +
-                         "WHERE pos_code = 23),\n" +
-                         "missing_skills AS ((SELECT per_id, ks_code\n" +
-                         "FROM person, needed_skills)\n" +
-                         "MINUS\n" +
-                         "(SELECT per_id, ks_code\n" +
-                         "FROM has_skill))\n" +
-                         "SELECT DISTINCT ks_code, COUNT(per_id)\n" +
-                         "FROM missing_skills\n" +
-                         "GROUP BY ks_code";
+            queries[16]= "WITH needed_skills AS (SELECT ks_code\n" +
+                          "                     FROM requires\n" +
+                           "                    WHERE pos_code = 24),\n" +
+                            " missing_skills AS ((SELECT per_id, ks_code\n" +
+                             "                    FROM person, needed_skills)\n" +
+                             "                   MINUS\n" +
+                              "                   (SELECT per_id, ks_code\n" +
+                               "                   FROM has_skill)),\n" +
+                             "count_missing AS (SELECT per_id, COUNT(ks_code) AS num_miss\n" +
+                              "                 FROM missing_skills\n" +
+                               "                GROUP BY per_id),\n" +
+                             "missed_one AS (SELECT per_id\n" +
+                              "              FROM count_missing\n" +
+                               "             WHERE num_miss = 1)\n" +
+                        "SELECT DISTINCT ks_code, COUNT(per_id)\n" +                
+                        "FROM missing_skills NATURAL JOIN missed_one\n" +
+                        "GROUP BY ks_code";
             queries[17]= "WITH needed_skills AS (SELECT ks_code\n" +
                          "FROM requires\n" +
                          "WHERE pos_code = 23),\n" +
@@ -774,116 +778,133 @@ public class InteractDB{
                          "SELECT AVG(pay_change)\n" +
                          "FROM difference";
             queries[25]= "WITH leaf_cate AS (SELECT cate_code\n" +
-                         "FROM job_category T\n" +
-                         "WHERE NOT EXISTS (SELECT parent_cate\n" +
-                         "FROM job_category P\n" +
-                         "WHERE P.parent_cate = T.cate_code)),\n" +
-                         "emp_pos AS (SELECT pos_code, cate_code\n" +
-                         "FROM position P\n" +
-                         "WHERE NOT EXISTS (SELECT pos_code\n" +
-                         "FROM works W\n" +
-                         "WHERE P.pos_code = W.pos_code\n" +
-                         "AND W.end_date > SYSDATE)),\n" +
-                         "vacancies AS (SELECT cate_code, COUNT(pos_code) AS num_vac\n" +
-                         "FROM leaf_cate NATURAL JOIN emp_pos\n" +
-                         "GROUP BY cate_code),\n" +
-                         "unemployed AS (SELECT per_id\n" +
-                         "FROM person P\n" +
-                         "WHERE NOT EXISTS (SELECT pos_code\n" +
-                         "FROM works W\n" +
-                         "WHERE w.per_id = P.per_id\n" +
-                         "AND W.end_date > SYSDATE)),\n" +
-                         "setup AS (SELECT cate_code, pos_code, per_id\n" +
-                         "FROM unemployed, emp_pos),\n" +
-                         "qualified_people AS (SELECT cate_code, per_id\n" +
-                         "FROM setup T\n" +
-                         "WHERE NOT EXISTS ((SELECT ks_code\n" +
-                         "FROM requires P\n" +
-                         "WHERE P.pos_code = T.pos_code\n" +
-                         "MINUS\n" +
-                         "(SELECT ks_code\n" +
-                         "FROM has_skill H\n" +
-                         "WHERE H.per_id = T.per_id)))),\n" +
-                         "total_qual AS (SELECT cate_code, COUNT(per_id) AS num_qual\n" +
-                         "FROM qualified_people\n" +
-                         "GROUP BY cate_code),\n" +
-                         "diff AS (SELECT cate_code, num_vac - num_qual AS real_num\n" +
-                         "FROM total_qual NATURAL JOIN vacancies),\n" +
-                         "max_vac AS (SELECT MAX(real_num) AS max_num\n" +
-                         "FROM diff)\n" +
-                         "SELECT cate_code, real_num\n" +
-                         "FROM diff, max_vac\n" +
-                         "WHERE real_num = max_num";
+                                           "FROM job_category T\n" +
+                                           "WHERE NOT EXISTS (SELECT parent_cate\n" +
+                                            "                 FROM job_category P\n" +
+                                             "                WHERE P.parent_cate = T.cate_code)),\n" +
+                             "emp_pos AS (SELECT pos_code, cate_code\n" +
+                              "           FROM position P\n" +
+                               "          WHERE NOT EXISTS (SELECT pos_code\n" +
+                                "                           FROM works W\n" +
+                                 "                          WHERE P.pos_code = W.pos_code\n" +
+                                  "                         AND W.end_date > SYSDATE)),\n" +
+                             "vacancies AS (SELECT cate_code, COUNT(pos_code) AS num_vac\n" +
+                              "             FROM leaf_cate NATURAL JOIN emp_pos\n" +
+                               "            GROUP BY cate_code),\n" +
+                             "unemployed AS (SELECT per_id\n" +
+                              "              FROM person P\n" +
+                               "             WHERE NOT EXISTS (SELECT pos_code\n" +
+                                "                              FROM works W\n" +
+                                 "                             WHERE w.per_id = P.per_id\n" +
+                                  "                            AND W.end_date > SYSDATE)),\n" +
+                             "setup AS (SELECT cate_code, per_id\n" +
+                              "         FROM unemployed, job_category),\n" +
+                             "qualifications AS (SELECT ks_code, cate_code\n" +
+                              "                  FROM core_skill NATURAL JOIN knowledge_skill),\n" +
+                             "qualified_people AS (SELECT cate_code, COUNT(per_id) AS num_qual\n" +
+                              "                    FROM setup T\n" +
+                               "                   WHERE NOT EXISTS ((SELECT ks_code\n" +
+                                "                                     FROM qualifications P\n" +
+                                 "                                    WHERE P.cate_code = T.cate_code\n" +
+                                  "                                   MINUS\n" +
+                                   "                                 (SELECT ks_code\n" +
+                                    "                                 FROM has_skill H\n" +
+                                     "                                WHERE H.per_id = T.per_id)))\n" +
+                                      "            GROUP BY cate_code),\n" +
+                             "diff AS (SELECT cate_code, CASE\n" +
+                              "                              WHEN EXISTS (SELECT *\n" +
+                               "                                          FROM qualified_people P\n" +
+                                "                                         WHERE P.cate_code = V.cate_code)\n" +
+                                 "                           THEN num_vac -\n" +
+                                  "                               (SELECT num_qual\n" +
+                                   "                               FROM qualified_people P\n" +
+                                     "                             WHERE P.cate_code = V.cate_code)\n" +
+                                    "                        ELSE num_vac\n" +
+                                     "                       END AS real_num\n" +
+                                      "FROM vacancies V),\n" +
+                             "max_vac AS (SELECT MAX(real_num) AS max_num\n" +
+                              "           FROM diff)\n" +
+                        "SELECT cate_code, real_num\n" +
+                        "FROM diff, max_vac\n" +
+                        "WHERE real_num = max_num";
             queries[26]= "WITH leaf_cate AS (SELECT cate_code\n" +
-                         "FROM job_category T\n" +
-                         "WHERE NOT EXISTS (SELECT parent_cate\n" +
-                         "FROM job_category P\n" +
-                         "WHERE P.parent_cate = T.cate_code)),\n" +
-                         "emp_pos AS (SELECT pos_code, cate_code\n" +
-                         "FROM position P\n" +
-                         "WHERE NOT EXISTS (SELECT pos_code\n" +
-                         "FROM works W\n" +
-                         "WHERE P.pos_code = W.pos_code\n" +
-                         "AND W.end_date > SYSDATE)),\n" +
-                         "vacancies AS (SELECT cate_code, COUNT(pos_code) AS num_vac\n" +
-                         "FROM leaf_cate NATURAL JOIN emp_pos\n" +
-                         "GROUP BY cate_code),\n" +
-                         "unemployed AS (SELECT per_id\n" +
-                         "FROM person P\n" +
-                         "WHERE NOT EXISTS (SELECT pos_code\n" +
-                         "FROM works W\n" +
-                         "WHERE W.per_id = P.per_id\n" +
-                         "AND W.end_date > SYSDATE)),\n" +
-                         "setup AS (SELECT cate_code, pos_code, per_id\n" +
-                         "FROM unemployed, emp_pos),\n" +
-                         "qualified_people AS (SELECT cate_code, per_id, pos_code\n" +
-                         "FROM setup T\n" +
-                         "WHERE NOT EXISTS ((SELECT ks_code\n" +
-                         "FROM requires P\n" +
-                         "WHERE P.pos_code = T.pos_code\n" +
-                         "MINUS\n" +
-                         "(SELECT ks_code\n" +
-                         "FROM has_skill H\n" +
-                         "WHERE H.per_id = T.per_id)))),\n" +
-                         "total_qual AS (SELECT cate_code, COUNT(per_id) AS num_qual\n" +
-                         "FROM qualified_people\n" +
-                         "GROUP BY cate_code),\n" +
-                         "diff AS (SELECT cate_code, num_vac - num_qual AS real_num\n" +
-                         "FROM total_qual NATURAL JOIN vacancies),\n" +
-                         "max_vac AS (SELECT MAX(real_num) AS max_num\n" +
-                         "FROM diff),\n" +
-                         "relevent_cate AS (SELECT cate_code\n" +
-                         "FROM diff, max_vac\n" +
-                         "WHERE real_num = max_num),\n" +
-                         "unqualified_people AS ((SELECT per_id\n" +
-                         "FROM unemployed)\n" +
-                         "MINUS\n" +
-                         "(SELECT per_id\n" +
-                         "FROM qualified_people NATURAL JOIN relevent_cate)),\n" +
-                         "relevent_pos AS (SELECT pos_code, ks_code\n" +
-                         "FROM position NATURAL JOIN requires NATURAL JOIN relevent_cate),\n" +
-                         "setup_courses AS (SELECT c_code, per_id\n" +
-                         "FROM unqualified_people, course),\n" +
-                         "qualifies AS (SELECT c_code, COUNT(per_id) AS num_qual\n" +
-                         "FROM setup_courses M\n" +
-                         "WHERE EXISTS (SELECT pos_code\n" +
-                         "FROM relevent_pos P\n" +
-                         "WHERE NOT EXISTS (((SELECT ks_code\n" +
-                         "FROM relevent_pos T\n" +
-                         "WHERE P.pos_code = T.pos_code)\n" +
-                         "MINUS\n" +
-                         "(SELECT ks_code\n" +
-                         "FROM has_skill H\n" +
-                         "WHERE H.per_id = M.per_id))\n" +
-                         "MINUS\n" +
-                         "(SELECT ks_code\n" +
-                         "FROM teaches E\n" +
-                         "WHERE E.c_code = M.c_code)))\n" +
-                         "GROUP BY c_code),\n" +
-                         "max_qualifies AS (SELECT MAX(num_qual) AS max_num\n" +
-                         "FROM qualifies)\n" +
-                         "SELECT c_code, num_qual\n" +
-                         "FROM qualifies, max_qualifies\n" +
-                         "WHERE max_num = num_qual";
+                          "                 FROM job_category T\n" +
+                           "                WHERE NOT EXISTS (SELECT parent_cate\n" +
+                            "                                 FROM job_category P\n" +
+                             "                                WHERE P.parent_cate = T.cate_code)),\n" +
+                             "emp_pos AS (SELECT pos_code, cate_code\n" +
+                              "           FROM position P\n" +
+                               "          WHERE NOT EXISTS (SELECT pos_code\n" +
+                                "                           FROM works W\n" +
+                                 "                          WHERE P.pos_code = W.pos_code\n" +
+                                  "                         AND W.end_date > SYSDATE)),\n" +
+                             "vacancies AS (SELECT cate_code, COUNT(pos_code) AS num_vac\n" +
+                              "             FROM leaf_cate NATURAL JOIN emp_pos\n" +
+                               "            GROUP BY cate_code),\n" +
+                             "unemployed AS (SELECT per_id\n" +
+                              "              FROM person P\n" +
+                               "             WHERE NOT EXISTS (SELECT pos_code\n" +
+                                "                              FROM works W\n" +
+                                 "                             WHERE w.per_id = P.per_id\n" +
+                                  "                            AND W.end_date > SYSDATE)),\n" +
+                             "qualifications AS (SELECT ks_code, cate_code\n" +
+                              "                  FROM core_skill NATURAL JOIN knowledge_skill),\n" +
+                             "setup AS (SELECT cate_code, pos_code, per_id\n" +
+                              "         FROM unemployed, emp_pos),\n" +
+                             "qualified_people AS (SELECT cate_code, per_id\n" +
+                             "                     FROM setup T\n" +
+                              "                    WHERE NOT EXISTS ((SELECT ks_code\n" +
+                               "                                      FROM qualifications P\n" +
+                                "                                     WHERE P.cate_code = T.cate_code\n" +
+                                 "                                    MINUS\n" +
+                                  "                                  (SELECT ks_code\n" +
+                                   "                                  FROM has_skill H\n" +
+                                    "                                 WHERE H.per_id = T.per_id)))),\n" +
+                             "qual_num AS (SELECT cate_code, COUNT(per_id) AS num_qual\n" +
+                              "            FROM qualified_people\n" +
+                               "           GROUP BY cate_code),\n" +
+                             "diff AS (SELECT cate_code, CASE\n" +
+                              "                              WHEN EXISTS (SELECT *\n" +
+                               "                                          FROM qual_num P\n" +
+                                "                                         WHERE P.cate_code = V.cate_code)\n" +
+                                 "                           THEN num_vac -\n" +
+                                  "                               (SELECT num_qual\n" +
+                                   "                               FROM qual_num P\n" +
+                                    "                              WHERE P.cate_code = V.cate_code)\n" +
+                                     "                       ELSE num_vac\n" +
+                                      "                      END AS real_num\n" +
+                                      "FROM vacancies V),\n" +
+                             "max_vac AS (SELECT MAX(real_num) AS max_num\n" +
+                              "           FROM diff),\n" +
+                             "relevent_cate AS (SELECT cate_code\n" +
+                              "                 FROM diff, max_vac\n" +
+                               "                WHERE real_num = max_num),\n" +
+                             "unqualified_people AS ((SELECT per_id\n" +
+                              "                       FROM unemployed)\n" +
+                               "                      MINUS\n" +
+                                "                    (SELECT per_id\n" +
+                                 "                    FROM qualified_people NATURAL JOIN relevent_cate)),\n" +
+                             "relevent_qual AS (SELECT cate_code, ks_code\n" +
+                              "                FROM qualifications NATURAL JOIN relevent_cate),\n" +
+                             "setup_courses AS (SELECT c_code, per_id\n" +
+                              "                 FROM unqualified_people, course),\n" +
+                             "qualifies AS (SELECT c_code, COUNT(per_id) AS num_qual\n" +
+                              "             FROM setup_courses M\n" +
+                               "            WHERE NOT EXISTS (((SELECT ks_code\n" +
+                                "                              FROM relevent_qual Q)\n" +
+                                 "                             MINUS\n" +
+                                  "                           (SELECT ks_code\n" +
+                                   "                           FROM has_skill H\n" +
+                                    "                          WHERE H.per_id = M.per_id))\n" +
+                                     "                         MINUS\n" +
+                                      "                       (SELECT ks_code\n" +
+                                       "                       FROM teaches T\n" +
+                                        "                      WHERE T.c_code = M.c_code))\n" +   
+                                         " GROUP BY c_code),\n" +
+                             "max_qualifies AS (SELECT MAX(num_qual) AS max_num\n" +
+                              "                 FROM qualifies)\n" +
+                        "SELECT c_code, num_qual\n" +
+                        "FROM qualifies, max_qualifies\n" +
+                        "WHERE max_num = num_qual";
   }
 }
