@@ -17,11 +17,12 @@ public class BestHire{
         pos_code = input.nextInt();
 
 
-        System.out.println("Qualified people: ");
+        System.out.println("\nQualified people: \n");
         runQuery(q1);
 
+        System.out.println();
 
-        System.out.println("People who miss the least number of skills: ");
+        System.out.println("People who miss the least number of skills: \n");
         runQuery(q2);
 
 
